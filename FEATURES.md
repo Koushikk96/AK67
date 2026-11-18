@@ -284,32 +284,35 @@ Manage placement drive pipelines and prepare for specific hiring company pattern
 
 ---
 
-## Module L: Placement Readiness Analytics
+## Module L: Placement Readiness Analytics *(Implemented in Phase 7)*
 
 ### Purpose
-Deliver clear, non-sugarcoated, honest data insights into placement readiness, calculated strictly from local IndexedDB data.
+Deliver clear, non-sugarcoated, honest data insights into placement readiness, calculated strictly from local IndexedDB data across all 188 curriculum items.
 
 ### Analytics Visualizations
-- **Overall Placement Readiness Gauge**: Composite score calculated from DSA completion percentage, revision health, Core CS coverage, and mock test accuracy.
-- **DSA Topic Radar / Bar Breakdown**: Completion rate per topic (Arrays, DP, Graphs, etc.).
-- **Difficulty Breakdown**: Donut / bar chart of solved problems (Easy vs Medium vs Hard).
+- **Overall Placement Readiness Gauge**: Total curriculum readiness gauge (`x / 188` Mastered), completion percentage, learning counts, and active revision backlog.
+- **10-Pillar Subject Breakdown**: Progress meters, completed/total counts, and mock accuracy for DSA, C++, SQL, DBMS, OS, Computer Networks, Software Engineering, Quantitative Aptitude, Logical Reasoning, and Verbal Ability.
+- **Difficulty Breakdown**: Solved problems by complexity (Easy, Medium, Hard).
 - **Spaced Revision Compliance**: Ratio of on-time revisions vs overdue backlog.
-- **Weekly Study Time & Streak Heatmap**: Hours logged per day via study sessions.
-- **Identified Weak Areas**: Algorithmic topics or Core CS subjects where accuracy is below 60%.
+- **Weekly Study Time & Streak Heatmap**: Hours logged per day via study sessions and 30-day calendar activity heatmap.
+- **Identified Weak Areas**: Diagnostic rules identifying subjects with <60% accuracy, overdue revisions (>3 days), and high-assistance problems, categorized into 5 discrete severities with actionable remedies.
 
 ---
 
-## Module M: Notes, Bookmarks & Mistake Repository
+## Module M: Notes, Bookmarks & Mistake Repository *(Implemented in Phase 7)*
 
 ### Purpose
 Give students a personal knowledge repository to record epiphanies, save code snippets, and systematically track their common mistakes.
 
 ### Features
 - **Global Notes Hub**:
-  - Create markdown notes with tags (`#dp`, `#pointers`, `#interview_tip`).
-  - Search notes by keyword, title, or tag.
+  - Unified view consolidating standalone notes, DSA problem notes, technical topic notes, and company interview notes.
+  - Markdown preview toggle, note pinning, tags indexing, and category filtering.
+  - Search notes by keyword, title, content, or tag.
 - **Dedicated Mistake Log**:
   - Specialized log for recording errors made during practice or tests (e.g., "Forgot integer overflow with $10^9$", "Off-by-one in binary search while condition").
-  - Root cause tagging (e.g., `Syntax`, `Edge Case`, `Time Limit Exceeded`, `Conceptual`).
+  - 8 Standardized root cause categories (`Conceptual misunderstanding`, `Incorrect formula`, `Logical error`, `Syntax error`, `Edge case missed`, `Time management`, `Careless mistake`, `Misread question`).
+  - Structured fields: what went wrong, correct approach, personal lesson, difficulty, and review status (`pending`, `reviewed`, `resolved`).
+  - Search and filter by subject, category, and review status.
 - **One-Click Bookmarks View**:
   - Filter and review all problems, SQL queries, or interview questions bookmarked across the application.

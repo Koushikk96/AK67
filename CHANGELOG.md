@@ -9,9 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 7
-- Module L: Placement Analytics & Weak Area Diagnosis (readiness score, radar charts, category mastery breakdown).
-- Module M: Personal Notes, Formulas & Mistake Log Repository.
+### Planned for Phase 8
+- Progressive Web App (PWA) manifest and icons.
+- Offline Service Worker with caching strategies.
+- Offline status banner and update notification.
+
+---
+
+## [0.8.0] - 2026-11-18
+
+### Added (Phase 7: Analytics, Notes & Mistake Repository)
+- **Unified Analytics Dashboard (`src/pages/Analytics/AnalyticsPage.tsx`, `src/services/analyticsService.ts`)**:
+  - Live data aggregation across all 188 curriculum items (DSA: 67, C++: 17, SQL: 21, Core CS: 47, Aptitude: 36).
+  - Readiness overview tab: total curriculum items, completed items, learning items, in-revision items, overall completion percentage, total study hours, mock test count, average mock score, highest mock score, and average mock accuracy.
+  - 10-pillar subject performance tab: progress meters, completion percentages, active revision backlogs, and mock accuracy benchmarks.
+  - Mock test analytics tab: score progression, category breakdown, difficulty filters, and accuracy distribution.
+  - Study activity tab: daily, weekly, monthly study time, consecutive day streak, longest streak, and 30-day activity heatmap.
+- **Weak Area Detection Diagnostics (`src/services/analyticsService.ts`)**:
+  - Automated diagnostic rules: low mock test accuracy (<60%), overdue revisions (>3 days), and difficult problem patterns.
+  - Classification into 5 discrete severities: `needs_improvement`, `moderate`, `strong`, `not_started`, and `insufficient_data`.
+  - Detailed diagnostic card for each weak area with diagnostic flag reason, supporting data (e.g. 40% mock accuracy), actionable recommendation, and 1-click navigation to practice or review.
+- **Mistake Repository (`src/pages/Mistakes/MistakesPage.tsx`, `src/services/mistakeService.ts`, `src/hooks/useMistakes.ts`)**:
+  - Dedicated mistake tracking system: title, subject (10 pillars), related problem/topic, 8 standardized mistake categories (Conceptual misunderstanding, Incorrect formula, Logical error, Syntax error, Edge case missed, Time management, Careless mistake, Misread question), whatWentWrong, correctApproach, personalLesson, difficulty (Easy, Medium, Hard), and reviewStatus (`pending`, `reviewed`, `resolved`).
+  - Search, multi-criteria filter dropdowns by subject, mistake category, and review status.
+  - Add and Edit mistake modals with pre-filled inputs.
+  - 1-click status progression (`pending` -> `reviewed` -> `resolved`).
+  - Non-destructive persistence within IndexedDB `notes` table using `isMistakeLog: true`.
+- **Personal Notes Manager (`src/pages/Notes/NotesPage.tsx`, `src/hooks/useNotes.ts`)**:
+  - Consolidated knowledge hub combining direct notes, DSA problem personal notes, technical topic notes, and company interview notes.
+  - Note pinning, tags indexing, category filtering, and instant search across titles, content, and tags.
+  - Interactive Markdown preview toggle.
+- **Placement Command Dashboard Enhancements (`src/pages/Dashboard/DashboardPage.tsx`)**:
+  - Overall Curriculum Readiness gauge (`x / 188` Mastered) added to primary metrics.
+  - Secondary metrics row upgraded with Consistency Rhythm (streak, longest streak, weekly study minutes) and Weak Area Diagnostic Radar.
+  - Diagnostic Alert Banner dynamically displayed when critical weak areas are identified.
+  - Recent Mistakes widget (last 3 entries with status badge) and Recent Notes widget (last 3 entries with tag pills).
+  - Quick action buttons added to Command Banner for Analytics, Mistakes, and Notes.
+  - Bottom learning roadmap updated with Module L (Analytics) and Module M (Mistakes & Notes Hub).
+- **Automated Verification Suite (`tests/analyticsAndNotes.test.ts`)**:
+  - 53 assertions covering exact 188 curriculum count, unified analytics calculations, streak and heatmap derivation, weak area diagnostic flags, mistake repository CRUD, notes search/pinning, and JSON backup integrity.
+  - 100% pass rate across all 7 test suites (234 / 234 total assertions passed).
+  - Production build (`npm run build`) passing with zero errors.
 
 ---
 

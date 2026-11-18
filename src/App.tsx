@@ -17,6 +17,7 @@ import { InterviewsPage } from '@/pages/Interviews/InterviewsPage';
 import { CompaniesPage } from '@/pages/Companies/CompaniesPage';
 import { AnalyticsPage } from '@/pages/Analytics/AnalyticsPage';
 import { NotesPage } from '@/pages/Notes/NotesPage';
+import { MistakesPage } from '@/pages/Mistakes/MistakesPage';
 import { SettingsPage } from '@/pages/Settings/SettingsPage';
 
 const AppContent: React.FC = () => {
@@ -47,9 +48,11 @@ const AppContent: React.FC = () => {
       case 'companies':
         return <CompaniesPage />;
       case 'analytics':
-        return <AnalyticsPage />;
+        return <AnalyticsPage navigate={navigate} />;
       case 'notes':
         return <NotesPage />;
+      case 'mistakes':
+        return <MistakesPage />;
       case 'settings':
         return <SettingsPage />;
       default:

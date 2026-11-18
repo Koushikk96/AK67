@@ -9,10 +9,13 @@ import { dailyPlannerRepository } from '@/db/repositories/dailyPlannerRepository
 import { topicRepository } from '@/db/repositories/topicRepository';
 import { mockTestRepository } from '@/db/repositories/mockTestRepository';
 import { companyRepository } from '@/db/repositories/companyRepository';
-import { DailyPlannerEntry } from '@/types/database';
+import { noteRepository } from '@/db/repositories/noteRepository';
+import { DailyPlannerEntry, PersonalNote } from '@/types/database';
 import { DSAProblemWithProgress } from '@/types/dsa';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
 import { revisionService, RevisionQueueData } from '@/services/revisionService';
+import { analyticsService, UnifiedAnalyticsData } from '@/services/analyticsService';
+import { mistakeService } from '@/services/mistakeService';
 import {
   Code2,
   RotateCcw,
@@ -37,6 +40,11 @@ import {
   Award,
   Building2,
   UserCheck,
+  BarChart3,
+  AlertOctagon,
+  FileText,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -88,21 +96,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
     activePipeline: 0,
   });
 
-  // Fetch streak, daily planner, revision queue, subject progress, mock tests, and companies
+  const [unifiedData, setUnifiedData] = useState<UnifiedAnalyticsData | null>(null);
+  const [recentMistakes, setRecentMistakes] = useState<PersonalNote[]>([]);
+  const [recentNotes, setRecentNotes] = useState<PersonalNote[]>([]);
+
+  // Fetch streak, daily planner, revision queue, subject progress, mock tests, companies, unified analytics, mistakes, and notes
   const loadLiveData = async () => {
     try {
-      const [currentStreak, todayPlanner, allTopics, revQueue, allMockTests, allCompanies] = await Promise.all([
+      const [
+        currentStreak,
+        todayPlanner,
+        allTopics,
+        revQueue,
+        allMockTests,
+        allCompanies,
+        analyticsData,
+        allMistakes,
+        allNotes,
+      ] = await Promise.all([
         studySessionRepository.calculateStreak(),
         dailyPlannerRepository.getToday(),
         topicRepository.getAll(),
         revisionService.getRevisionQueue(),
         mockTestRepository.getAll(),
         companyRepository.getAll(),
+        analyticsService.getUnifiedAnalytics(),
+        mistakeService.getAllMistakes(),
+        noteRepository.getAll(),
       ]);
 
       setStreak(currentStreak);
       setDailyPlanner(todayPlanner);
       setRevisionData(revQueue);
+      setUnifiedData(analyticsData);
+      setRecentMistakes(allMistakes.slice(0, 3));
+      setRecentNotes(allNotes.filter((n) => !n.isMistakeLog).slice(0, 3));
 
       // Calculate mock test metrics
       const totalMockCount = allMockTests.length;
@@ -223,6 +251,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
   });
 
   const totalRevisionsDue = revisionData.dueToday.length + revisionData.overdue.length;
+  const totalCurriculumItems = 188;
+  const totalMastered = (dsaStats.solved || 0) + techStats.totalCompleted + aptitudeStats.totalCompleted;
+  const overallPercentage = Math.round((totalMastered / totalCurriculumItems) * 100);
+
+  const weakestArea = useMemo(() => {
+    if (!unifiedData || !unifiedData.weakAreas) return null;
+    const critical = unifiedData.weakAreas.filter((w) => w.severity === 'needs_improvement');
+    return critical.length > 0 ? critical[0] : null;
+  }, [unifiedData]);
 
   return (
     <div className="space-y-6">
@@ -232,7 +269,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                Phase 5 Active • Complete Placement Prep System
+                Phase 7 Active • Placement Preparation & Intelligence System
               </span>
               <Badge variant="solved">IndexedDB Device Storage</Badge>
               {streak > 0 && (
@@ -246,7 +283,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               Placement Command Center
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
-              Targeted fresher preparation workspace across DSA, C++, SQL, Core CS, Aptitude, Spaced Revision, and Daily Targets.
+              Targeted fresher preparation workspace across DSA (67), Technical (85), Aptitude (36), Spaced Revision, Mock Tests, Analytics & Mistakes.
             </p>
           </div>
 
@@ -272,17 +309,25 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 </span>
               )}
             </Button>
-            <Button variant="outline" onClick={() => navigate('planner')}>
-              <Calendar className="mr-2 h-4 w-4 text-emerald-400" />
-              Planner
-            </Button>
             <Button variant="outline" onClick={() => navigate('mock-tests')}>
               <Award className="mr-2 h-4 w-4 text-amber-400" />
               Mock Tests
             </Button>
-            <Button variant="outline" onClick={() => navigate('interview')}>
-              <UserCheck className="mr-2 h-4 w-4 text-cyan-400" />
-              Interview
+            <Button variant="outline" onClick={() => navigate('analytics')}>
+              <BarChart3 className="mr-2 h-4 w-4 text-emerald-400" />
+              Analytics
+            </Button>
+            <Button variant="outline" onClick={() => navigate('mistakes')}>
+              <AlertOctagon className="mr-2 h-4 w-4 text-amber-400" />
+              Mistakes ({recentMistakes.length})
+            </Button>
+            <Button variant="outline" onClick={() => navigate('notes')}>
+              <FileText className="mr-2 h-4 w-4 text-indigo-400" />
+              Notes
+            </Button>
+            <Button variant="outline" onClick={() => navigate('planner')}>
+              <Calendar className="mr-2 h-4 w-4 text-cyan-400" />
+              Planner
             </Button>
             <Button variant="outline" onClick={() => navigate('companies')}>
               <Building2 className="mr-2 h-4 w-4 text-rose-400" />
@@ -292,8 +337,36 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         </div>
       </div>
 
-      {/* Primary Key Metrics Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* Primary Key Metrics Grid - 5 Pillars */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+        {/* Metric 0: Overall Curriculum Readiness */}
+        <Card
+          className="cursor-pointer transition hover:border-emerald-500/40 bg-zinc-900/60"
+          onClick={() => navigate('analytics')}
+        >
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center justify-between">
+              <span className="font-medium text-emerald-400">Overall Readiness</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            </CardDescription>
+            <CardTitle className="text-2xl font-bold text-white">
+              {totalMastered} / 188
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-500"
+                style={{ width: `${overallPercentage}%` }}
+              />
+            </div>
+            <p className="flex justify-between text-[11px] text-zinc-400">
+              <span>{overallPercentage}% mastered</span>
+              <span className="text-emerald-400 hover:underline">Full Analytics →</span>
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Metric 1: DSA Solved */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700"
@@ -316,7 +389,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               />
             </div>
             <p className="flex justify-between text-[11px] text-zinc-400">
-              <span>{dsaStats.completionPercentage}% completed</span>
+              <span>{dsaStats.completionPercentage}% solved</span>
               <span>{dsaStats.attempted} attempted</span>
             </p>
           </CardContent>
@@ -359,7 +432,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         >
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between">
-              <span className="font-medium text-zinc-300">Aptitude & Reasoning</span>
+              <span className="font-medium text-zinc-300">Aptitude & Logic</span>
               <Calculator className="h-4 w-4 text-emerald-400" />
             </CardDescription>
             <CardTitle className="text-2xl font-bold text-white">
@@ -376,7 +449,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               />
             </div>
             <p className="flex justify-between text-[11px] text-zinc-400">
-              <span>Quant, Logical, Verbal</span>
+              <span>Quant, Reasoning</span>
               <span>{Math.round((aptitudeStats.totalCompleted / 36) * 100)}%</span>
             </p>
           </CardContent>
@@ -413,8 +486,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         </Card>
       </div>
 
-      {/* Secondary Metrics: Mock Tests & Company Pipeline */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Secondary Metrics: Mock Tests, Study Rhythm & Diagnostic Weak Areas */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Mock Assessment Performance */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
@@ -435,7 +508,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <CardContent className="pt-0">
             <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-2 mt-1">
               <span>Avg Score: <strong className="text-blue-400">{mockStats.avgScore}%</strong></span>
-              <span>Latest Score: <strong className="text-emerald-400">{mockStats.latestScore}%</strong></span>
+              <span>Latest: <strong className="text-emerald-400">{mockStats.latestScore}%</strong></span>
               <span className="text-blue-400 hover:underline flex items-center gap-0.5">
                 Practice <ChevronRight className="h-3 w-3" />
               </span>
@@ -443,33 +516,93 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           </CardContent>
         </Card>
 
-        {/* Company Preparation Pipeline */}
+        {/* Study Rhythm & Consistency */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
-          onClick={() => navigate('companies')}
+          onClick={() => navigate('analytics')}
         >
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Building2 className="h-4 w-4 text-rose-400" />
-                Campus Hiring Pipeline
+                <Flame className="h-4 w-4 text-amber-400" />
+                Study Rhythm
               </span>
-              <Badge variant="outline" className="text-[10px]">Module K</Badge>
+              <Badge variant="attempted" className="text-[10px] text-amber-400">{streak}d Streak</Badge>
             </div>
             <CardTitle className="text-xl font-bold text-white mt-1">
-              {companyStats.total} <span className="text-xs font-normal text-zinc-400">Target Companies</span>
+              {unifiedData?.activity.weeklyMinutes || 0} <span className="text-xs font-normal text-zinc-400">Minutes This Week</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-2 mt-1">
-              <span>Active in Pipeline: <strong className="text-amber-400">{companyStats.activePipeline} Drives</strong></span>
+              <span>Longest: <strong className="text-zinc-200">{unifiedData?.activity.longestStreak || streak} days</strong></span>
+              <span>Total: <strong className="text-zinc-200">{Math.round((unifiedData?.activity.totalMinutes || 0) / 60)} hrs</strong></span>
               <span className="text-blue-400 hover:underline flex items-center gap-0.5">
-                View Tracker <ChevronRight className="h-3 w-3" />
+                Heatmap <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Weak Area Diagnostic Radar */}
+        <Card
+          className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
+          onClick={() => navigate('analytics')}
+        >
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <AlertOctagon className="h-4 w-4 text-rose-400" />
+                Weak Area Radar
+              </span>
+              <Badge variant={weakestArea ? 'urgent' : 'solved'} className="text-[10px]">
+                {weakestArea ? 'Needs Review' : 'Stable'}
+              </Badge>
+            </div>
+            <CardTitle className="text-xl font-bold text-white mt-1 truncate">
+              {weakestArea ? weakestArea.subject : 'No Critical Weak Areas'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-2 mt-1">
+              <span className="truncate max-w-[200px]">
+                {weakestArea ? weakestArea.flagReason : 'All assessed pillars on track'}
+              </span>
+              <span className="text-rose-400 hover:underline flex items-center gap-0.5 whitespace-nowrap">
+                Inspect <ChevronRight className="h-3 w-3" />
               </span>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Weak Area Diagnostic Signal Banner (if exists) */}
+      {weakestArea && (
+        <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-950/20 p-4 text-zinc-200">
+          <div className="flex items-center gap-3">
+            <div className="rounded-md bg-amber-500/20 p-2 text-amber-400">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-amber-200 flex items-center gap-2">
+                <span>Diagnostic Alert: {weakestArea.subject}</span>
+                <Badge variant="attempted" className="text-[10px] uppercase font-mono">Needs Focus</Badge>
+              </h4>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {weakestArea.topicTitle}: {weakestArea.supportingData} — {weakestArea.recommendedAction}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('analytics')}
+            className="border-amber-500/40 text-amber-300 hover:bg-amber-900/30 whitespace-nowrap"
+          >
+            Diagnose in Analytics
+          </Button>
+        </div>
+      )}
 
       {/* Due Revision Alert Banner */}
       {totalRevisionsDue > 0 && (
@@ -664,6 +797,162 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Mistakes & Personal Notes Highlights */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column (6 cols): Recent Mistake Repository */}
+        <div className="space-y-4 lg:col-span-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold text-white flex items-center gap-2">
+                    <AlertOctagon className="h-4 w-4 text-amber-400" />
+                    <span>Recent Mistakes & Anti-Patterns</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Track conceptual slips, missed edge cases, and exam errors
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('mistakes')}
+                  className="text-xs text-amber-400 hover:text-amber-300"
+                >
+                  Mistake Hub ({recentMistakes.length}) <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2.5 pt-0">
+              {recentMistakes.length === 0 ? (
+                <div className="p-6 text-center border border-dashed border-zinc-800 rounded-lg bg-zinc-900/20 space-y-2">
+                  <AlertOctagon className="h-6 w-6 text-zinc-600 mx-auto" />
+                  <p className="text-xs text-zinc-400">No mistakes logged yet.</p>
+                  <p className="text-[11px] text-zinc-500 max-w-xs mx-auto">
+                    Log missed questions or wrong answers to turn past errors into future placement strengths.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('mistakes')}
+                    className="text-xs h-7"
+                  >
+                    Log First Mistake
+                  </Button>
+                </div>
+              ) : (
+                recentMistakes.map((m) => (
+                  <div
+                    key={m.id}
+                    onClick={() => navigate('mistakes')}
+                    className="flex flex-col gap-1.5 p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-zinc-200 line-clamp-1">
+                        {m.title}
+                      </span>
+                      <Badge
+                        variant={m.reviewStatus === 'resolved' ? 'solved' : m.reviewStatus === 'reviewed' ? 'attempted' : 'urgent'}
+                        className="text-[10px] uppercase font-mono px-1.5 py-0"
+                      >
+                        {m.reviewStatus || 'pending'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-amber-400 font-medium">{m.subject || m.category}</span>
+                        {m.mistakeCategory && (
+                          <span className="text-zinc-500">• {m.mistakeCategory}</span>
+                        )}
+                      </div>
+                      <span className="text-zinc-500 font-mono text-[10px]">
+                        {formatRecentDate(m.updatedAt || m.dateRecorded)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column (6 cols): Personal Study Notes */}
+        <div className="space-y-4 lg:col-span-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold text-white flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-indigo-400" />
+                    <span>Personal Knowledge Notes</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Key placement insights, formulas, and interview takeaways
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('notes')}
+                  className="text-xs text-indigo-400 hover:text-indigo-300"
+                >
+                  Notes Hub <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2.5 pt-0">
+              {recentNotes.length === 0 ? (
+                <div className="p-6 text-center border border-dashed border-zinc-800 rounded-lg bg-zinc-900/20 space-y-2">
+                  <FileText className="h-6 w-6 text-zinc-600 mx-auto" />
+                  <p className="text-xs text-zinc-400">No personal notes created yet.</p>
+                  <p className="text-[11px] text-zinc-500 max-w-xs mx-auto">
+                    Capture quick algorithms, system design notes, or SQL syntax cheatsheets.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('notes')}
+                    className="text-xs h-7"
+                  >
+                    Create Note
+                  </Button>
+                </div>
+              ) : (
+                recentNotes.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => navigate('notes')}
+                    className="flex flex-col gap-1.5 p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 hover:border-zinc-700 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-zinc-200 line-clamp-1">
+                        {n.title}
+                      </span>
+                      {n.isPinned && (
+                        <Badge variant="attempted" className="text-[9px] px-1 py-0">
+                          Pinned
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-indigo-400 font-medium">{n.category || 'General'}</span>
+                        {Array.isArray(n.tags) && n.tags.length > 0 && (
+                          <span className="text-zinc-500">• #{n.tags.slice(0, 2).join(' #')}</span>
+                        )}
+                      </div>
+                      <span className="text-zinc-500 font-mono text-[10px]">
+                        {formatRecentDate(n.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
@@ -1293,6 +1582,46 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               </CardTitle>
               <CardDescription>
                 Company-specific test patterns, cutoffs, round checklists, and application status tracker. ({companyStats.total} Companies)
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Module L: Preparation Analytics & Insights */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('analytics')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module L • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-emerald-400" />
+                <span>Preparation Analytics</span>
+              </CardTitle>
+              <CardDescription>
+                Curriculum readiness across all 188 items, 10 pillar breakdown, mock trends, and weak area diagnostics.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Module M: Mistake Repository & Notes */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('mistakes')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module M • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <AlertOctagon className="h-4 w-4 text-amber-400" />
+                <span>Mistakes & Notes Hub</span>
+              </CardTitle>
+              <CardDescription>
+                Track anti-patterns, conceptual errors, and edge case slips alongside your rich personal knowledge notes.
               </CardDescription>
             </CardHeader>
           </Card>

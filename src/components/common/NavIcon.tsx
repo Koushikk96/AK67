@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Building2,
   BookOpen,
+  AlertOctagon,
   Settings,
   LucideProps,
 } from 'lucide-react';
@@ -49,6 +50,8 @@ export const NavIcon: React.FC<NavIconProps> = ({ name, ...props }) => {
       return <Building2 {...props} />;
     case 'BookOpen':
       return <BookOpen {...props} />;
+    case 'AlertOctagon':
+      return <AlertOctagon {...props} />;
     case 'Settings':
       return <Settings {...props} />;
     default:

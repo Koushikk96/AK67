@@ -14,6 +14,7 @@ export type RouteId =
   | 'companies'
   | 'analytics'
   | 'notes'
+  | 'mistakes'
   | 'settings';
 
 export interface NavItem {

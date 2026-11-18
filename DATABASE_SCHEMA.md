@@ -127,11 +127,13 @@ React components never access Dexie tables directly. All interactions are routed
    - `upsert(profile)`, `updateStatus(id, status)`
    - `toggleChecklist(companyId, checklistId)`
    - `delete(id)`, `countTotal()`, `batchPut(records)`
-6. **`noteRepository`** ([src/db/repositories/noteRepository.ts](file:///d:/Projects/AK67/src/db/repositories/noteRepository.ts)):
+6. **`noteRepository`** ([src/db/repositories/noteRepository.ts](file:///d:/Projects/AK67/src/db/repositories/noteRepository.ts)) & **`mistakeService`** ([src/services/mistakeService.ts](file:///d:/Projects/AK67/src/services/mistakeService.ts)):
    - `getById(id)`, `getAll()`, `getMistakes()`, `getByCategory(category)`
    - `search(query)` (multi-field search across title, content, and tags)
    - `upsert(note)`, `delete(id)`
    - `countTotal()`, `countMistakes()`, `batchPut(records)`
+   - Phase 7 extended schema: `subject`, `mistakeCategory` (8 categories), `whatWentWrong`, `correctApproach`, `personalLesson`, `reviewStatus` (`pending` | `reviewed` | `resolved`), `difficulty`, `isPinned`, and `dateRecorded`.
+   - `mistakeService`: `getAllMistakes()`, `createMistake()`, `updateMistake()`, `updateStatus()`, `searchMistakes()`, `deleteMistake()`.
 7. **`studySessionRepository`** ([src/db/repositories/studySessionRepository.ts](file:///d:/Projects/AK67/src/db/repositories/studySessionRepository.ts)):
    - `getById(id)`, `getAll()`, `getByDate(dateStr)`
    - `logSession(durationMinutes, module, sessionType, dateStr?)`

@@ -196,6 +196,18 @@ export interface CompanyProfile {
   updatedAt: string;
 }
 
+export type MistakeCategory =
+  | 'Conceptual misunderstanding'
+  | 'Incorrect formula'
+  | 'Logical error'
+  | 'Syntax error'
+  | 'Edge case missed'
+  | 'Time management'
+  | 'Careless mistake'
+  | 'Misread question';
+
+export type MistakeReviewStatus = 'pending' | 'reviewed' | 'resolved';
+
 export interface PersonalNote {
   /** UUID */
   id: string;
@@ -213,6 +225,20 @@ export interface PersonalNote {
   isMistakeLog: boolean;
   /** Mistake classification if isMistakeLog is true */
   mistakeType?: string;
+  /** Whether the note is pinned to the top */
+  isPinned?: boolean;
+
+  // Extended fields when note represents a structured mistake log
+  subject?: string;
+  relatedId?: string;
+  mistakeCategory?: MistakeCategory;
+  whatWentWrong?: string;
+  correctApproach?: string;
+  personalLesson?: string;
+  dateRecorded?: string;
+  reviewStatus?: MistakeReviewStatus;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+
   /** ISO timestamp of creation */
   createdAt: string;
   /** ISO timestamp of last modification */

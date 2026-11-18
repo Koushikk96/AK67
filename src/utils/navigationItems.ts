@@ -108,11 +108,19 @@ export const NAVIGATION_ITEMS: NavItem[] = [
   // Personal Tools Section
   {
     id: 'notes',
-    label: 'Notes & Mistakes',
+    label: 'Personal Notes',
     shortLabel: 'Notes',
     section: 'personal',
     iconName: 'BookOpen',
-    description: 'Personal searchable notes, bookmarks and mistake log',
+    description: 'Personal searchable notes, code snippets and bookmarks',
+  },
+  {
+    id: 'mistakes',
+    label: 'Mistake Repository',
+    shortLabel: 'Mistakes',
+    section: 'personal',
+    iconName: 'AlertOctagon',
+    description: 'Systematic mistake logging, failure causes and lessons learned',
   },
   {
     id: 'settings',
