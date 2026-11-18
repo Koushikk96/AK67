@@ -1,15 +1,16 @@
 {
   "name": "ak67",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "tsx tests/databasePersistence.test.ts && tsx tests/dsaCurriculum.test.ts",
+    "test": "tsx tests/databasePersistence.test.ts && tsx tests/dsaCurriculum.test.ts && tsx tests/technicalCurriculum.test.ts",
     "test:db": "tsx tests/databasePersistence.test.ts",
-    "test:dsa": "tsx tests/dsaCurriculum.test.ts"
+    "test:dsa": "tsx tests/dsaCurriculum.test.ts",
+    "test:tech": "tsx tests/technicalCurriculum.test.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

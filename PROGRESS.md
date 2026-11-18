@@ -12,8 +12,8 @@ This document maintains real-time records of implemented phases, active mileston
 | **Phase 1** | Application Skeleton, Tooling & Design System | **COMPLETED** | 100% |
 | **Phase 2** | Local Data Layer & Persistent Storage Architecture | **COMPLETED** | 100% |
 | **Phase 3** | Dashboard & Curated 67 DSA Problems Module | **COMPLETED** | 100% |
-| **Phase 4** | Core Technical Modules (C++, SQL & Core CS) | **Pending Approval** | 0% |
-| **Phase 5** | Aptitude, Revision System & Daily Planner | Queued | 0% |
+| **Phase 4** | Core Technical Modules (C++, SQL & Core CS) | **COMPLETED** | 100% |
+| **Phase 5** | Aptitude, Revision System & Daily Planner | **Pending Approval** | 0% |
 | **Phase 6** | Mock Tests & Interview Preparation | Queued | 0% |
 | **Phase 7** | Analytics, Notes & Mistake Repository | Queued | 0% |
 | **Phase 8** | Progressive Web App (PWA) & Offline Excellence | Queued | 0% |
@@ -99,14 +99,46 @@ This document maintains real-time records of implemented phases, active mileston
   - Full test suite passed: 64/64 total assertions (47 DB persistence + 17 DSA curriculum).
   - Strict TypeScript check (`tsc --noEmit`) passed with 0 errors.
   - Production build (`npm run build`) passed with clean vendor/app code splitting.
-- **Git Commit**: Ready for Phase 3 commit.
+- **Git Commit**: `97e0aa3 feat(phase-3): build dashboard and 67-problem DSA preparation system`.
+
+### Session 5 — Phase 4: Essential C++, SQL & Core CS (2026-11-18)
+- **Built C++ Essentials Curriculum (`src/content/cpp/`)**:
+  - All 17 required topics implemented: Data types, conditions/loops, functions/recursion, arrays/strings, pointers/references, pass-by-value vs pass-by-reference, OOP principles, constructors/destructors, overloading vs overriding, virtual functions & vtable, stack vs heap, STL containers, STL algorithms, time/space complexity, shallow vs deep copy, exception handling, const and static keywords.
+  - Every topic includes crisp explanation, practical C++ code, important interview Qs, common candidate mistakes/traps, and short revision notes.
+  - Added compact collection of 15 high-frequency C++ interview FAQs.
+- **Built SQL Essentials & Practical Queries Arena (`src/content/sql/`)**:
+  - All 21 required SQL topics implemented: DBMS vs RDBMS, primary/foreign keys, constraints, SELECT/WHERE/DISTINCT, ORDER BY, INSERT/UPDATE/DELETE, aggregate functions, GROUP BY/HAVING, INNER JOIN, LEFT JOIN, RIGHT JOIN, SELF JOIN, subqueries, CTEs, window functions (ROW_NUMBER, RANK, DENSE_RANK), NULL handling, DELETE vs TRUNCATE vs DROP, normalization (1NF, 2NF, 3NF), indexing, ACID properties, transactions.
+  - Each topic includes syntax, sample tables, and expected query outputs.
+  - 21 practical SQL interview problems progressing from basic to intermediate with verified solutions and explanations (Nth highest salary, duplicate emails, department top earners, consecutive numbers, cumulative sums, retention, etc.).
+- **Built Core CS Curriculum (`src/content/coreCS/`)**:
+  - **DBMS (11 topics)**: DBMS vs RDBMS, keys/relationships, ER model, normalization, FDs, joins, indexing, transactions/ACID, concurrency/2PL, deadlocks, SQL execution.
+  - **Operating Systems (13 topics)**: Process vs thread, process states, CPU scheduling (FCFS, SJF, RR, Priority), context switching, synchronization, mutex vs semaphore, critical section, deadlocks, paging vs segmentation, virtual memory/thrashing, page replacement (FIFO, LRU, Optimal), stack vs heap, multithreading.
+  - **Computer Networks (13 topics)**: OSI 7 layers, TCP/IP model, TCP vs UDP, 3-way handshake & 4-way termination, HTTP vs HTTPS, DNS, DHCP (DORA), IP vs MAC/ARP, IPv4 vs IPv6, router vs switch, common ports, subnetting/CIDR, congestion control.
+  - **Software Engineering (10 topics)**: SDLC phases, Waterfall vs Agile, Scrum basics, functional vs NFRs, testing levels, black-box vs white-box, unit/integration/system, verification vs validation, Git fundamentals, SOLID principles.
+- **Unified User Experience & Persistence (`src/hooks/useTechnicalTopics.ts`)**:
+  - Direct connection to IndexedDB `topic_progress` table.
+  - Status updates (`not_started` -> `learning` -> `completed` -> `revise`), bookmarking, auto-saving personal notes on blur.
+  - Automated study session logging to `study_sessions` upon topic completion.
+- **Dedicated Interactive Pages**:
+  - `CPPPage.tsx`: Concept explorer, filter by status/search, and FAQ accordion.
+  - `SQLPage.tsx`: Dual-tab interface switching between 21 Core Concepts and 21 Practical Queries with inspection modals.
+  - `CoreCSPage.tsx`: Tabbed navigation across DBMS, OS, Computer Networks, and Software Engineering with live subject counters.
+  - `TopicDetailModal.tsx`: Universal detail view with code copying, traps, interview Qs, revision notes, and auto-saving notes.
+- **Dashboard Synchronization (`src/pages/Dashboard/DashboardPage.tsx`)**:
+  - Real-time technical knowledge foundations widget showing live completion across C++, SQL, and all 4 Core CS subjects (85 topics total).
+  - Roadmap pillar cards updated to reflect active status and live progress counters.
+- **Verification & Testing**:
+  - Created `tests/technicalCurriculum.test.ts` with 14 assertions (100% passed).
+  - All 3 test suites passing: 78 / 78 total assertions (47 DB persistence + 17 DSA + 14 Technical).
+  - Strict TypeScript check (`tsc --noEmit`) passing with 0 errors.
+  - Production build (`npm run build`) passing with 0 warnings.
+- **Git Commit**: Ready for Phase 4 commit.
 
 ---
 
-## 🎯 Next Phase Deliverables (Phase 4 — Upon Explicit User Approval)
+## 🎯 Next Phase Deliverables (Phase 5 — Upon Explicit User Approval)
 
-1. Build Module C: C++ Placement Mastery (Pointers, Memory, OOP, STL, Modern C++, 40+ Flashcards).
-2. Build Module D: SQL Query & Schema Mastery (Queries, Joins, Window Functions, Normalization).
-3. Build Module E: Core CS Fundamentals (OS, DBMS, Computer Networks, Software Engineering).
-4. Connect all technical topics to IndexedDB `topic_progress` and study session tracking.
-5. Commit Phase 4 milestone to Git.
+1. Build Module F: Aptitude & Reasoning (Quantitative, Logical, Verbal with topic theory, shortcut formulas, and practice sets).
+2. Build Module G: Interactive Spaced Revision Hub (active queue review, SM-2 interval scheduler, review history).
+3. Build Module H: Daily Study Planner & Focus Pomodoro Timer (daily goals, custom tasks, focus timer with local study session logging).
+4. Commit Phase 5 milestone to Git.

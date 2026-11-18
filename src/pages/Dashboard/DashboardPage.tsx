@@ -7,13 +7,13 @@ import { useDSAProblems } from '@/hooks/useDSAProblems';
 import { useDatabaseStats } from '@/hooks/useDatabaseStats';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
 import { dailyPlannerRepository } from '@/db/repositories/dailyPlannerRepository';
+import { topicRepository } from '@/db/repositories/topicRepository';
 import { DailyPlannerEntry } from '@/types/database';
 import { DSAProblemWithProgress } from '@/types/dsa';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
 import {
   Code2,
   RotateCcw,
-  HardDrive,
   ArrowRight,
   Flame,
   CheckCircle2,
@@ -24,6 +24,10 @@ import {
   BookOpen,
   Database,
   Terminal,
+  Cpu,
+  Server,
+  Network,
+  GitBranch,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -38,21 +42,63 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
   const [dailyPlanner, setDailyPlanner] = useState<DailyPlannerEntry | null>(null);
   const [selectedProblem, setSelectedProblem] = useState<DSAProblemWithProgress | null>(null);
 
-  // Fetch streak & today's planner entry
+  // Real-time technical topic stats from IndexedDB
+  const [techStats, setTechStats] = useState({
+    cpp: 0,
+    sql: 0,
+    dbms: 0,
+    os: 0,
+    cn: 0,
+    se: 0,
+    totalCompleted: 0,
+  });
+
+  // Fetch streak, daily planner, and technical topics progress
   useEffect(() => {
     let isMounted = true;
     const loadLiveData = async () => {
       try {
-        const [currentStreak, todayPlanner] = await Promise.all([
+        const [currentStreak, todayPlanner, allTopics] = await Promise.all([
           studySessionRepository.calculateStreak(),
           dailyPlannerRepository.getToday(),
+          topicRepository.getAll(),
         ]);
+
         if (isMounted) {
           setStreak(currentStreak);
           setDailyPlanner(todayPlanner);
+
+          let cpp = 0;
+          let sql = 0;
+          let dbms = 0;
+          let os = 0;
+          let cn = 0;
+          let se = 0;
+
+          for (const t of allTopics) {
+            const isDone = t.status === 'completed' || t.isMastered;
+            if (isDone) {
+              if (t.category === 'cpp') cpp++;
+              else if (t.category === 'sql') sql++;
+              else if (t.category === 'dbms') dbms++;
+              else if (t.category === 'os') os++;
+              else if (t.category === 'cn') cn++;
+              else if (t.category === 'se') se++;
+            }
+          }
+
+          setTechStats({
+            cpp,
+            sql,
+            dbms,
+            os,
+            cn,
+            se,
+            totalCompleted: cpp + sql + dbms + os + cn + se,
+          });
         }
       } catch (err) {
-        console.error('[DashboardPage] Error loading streak/planner:', err);
+        console.error('[DashboardPage] Error loading live data:', err);
       }
     };
 
@@ -111,8 +157,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
-                Phase 3 Active • DSA Sheet & Persistent Dashboard
+              <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                Phase 4 Active • Complete Fresher Placement Prep System
               </span>
               <Badge variant="solved">IndexedDB Device Storage</Badge>
               {streak > 0 && (
@@ -126,14 +172,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               Placement Command Center
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
-              Targeted placement preparation system. Zero logins, zero subscription paywalls, and complete data privacy—everything is stored persistently on your device.
+              Targeted fresher preparation workspace. Zero logins, zero subscription paywalls, and complete data privacy—everything is stored persistently on your device.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <Button variant="primary" onClick={() => navigate('dsa')}>
               <Code2 className="mr-2 h-4 w-4" />
-              Open 67 DSA Sheet
+              67 DSA Sheet
+            </Button>
+            <Button variant="outline" onClick={() => navigate('cpp')}>
+              <Terminal className="mr-2 h-4 w-4 text-amber-400" />
+              C++ ({techStats.cpp}/17)
+            </Button>
+            <Button variant="outline" onClick={() => navigate('sql')}>
+              <Database className="mr-2 h-4 w-4 text-cyan-400" />
+              SQL ({techStats.sql}/21)
             </Button>
             <Button
               variant="outline"
@@ -147,10 +201,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                   {dsaStats.dueRevisions}
                 </span>
               )}
-            </Button>
-            <Button variant="outline" onClick={() => navigate('settings')}>
-              <HardDrive className="mr-2 h-4 w-4 text-emerald-400" />
-              Backup
             </Button>
           </div>
         </div>
@@ -186,7 +236,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           </CardContent>
         </Card>
 
-        {/* Metric 2: Consistency Streak */}
+        {/* Metric 2: Core Technical Topics */}
+        <Card
+          className="cursor-pointer transition hover:border-zinc-700"
+          onClick={() => navigate('core-cs')}
+        >
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center justify-between">
+              <span className="font-medium text-zinc-300">Technical Mastery</span>
+              <Layers className="h-4 w-4 text-indigo-400" />
+            </CardDescription>
+            <CardTitle className="text-2xl font-bold text-white">
+              {techStats.totalCompleted} / 85
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div
+                className="h-full bg-indigo-500 transition-all duration-500"
+                style={{
+                  width: `${Math.round((techStats.totalCompleted / 85) * 100)}%`,
+                }}
+              />
+            </div>
+            <p className="flex justify-between text-[11px] text-zinc-400">
+              <span>C++, SQL & Core CS</span>
+              <span>{Math.round((techStats.totalCompleted / 85) * 100)}%</span>
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Metric 3: Consistency Streak */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700"
           onClick={() => navigate('planner')}
@@ -204,30 +284,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
             <p className="text-[11px] text-zinc-400">
               {streak > 0
                 ? 'Active streak! Daily momentum maintained.'
-                : 'Solve 1 problem today to start your streak.'}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Metric 3: Revisions Due */}
-        <Card
-          className="cursor-pointer transition hover:border-zinc-700"
-          onClick={() => navigate('revision')}
-        >
-          <CardHeader className="pb-2">
-            <CardDescription className="flex items-center justify-between">
-              <span className="font-medium text-zinc-300">Revisions Due</span>
-              <RotateCcw className="h-4 w-4 text-purple-400" />
-            </CardDescription>
-            <CardTitle className="text-2xl font-bold text-white">
-              {dsaLoading ? '...' : dsaStats.dueRevisions}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-zinc-400">
-              {dsaStats.dueRevisions > 0
-                ? `${dsaStats.dueRevisions} algorithms due for spaced review`
-                : 'All intervals clear! None due today.'}
+                : 'Study or solve 1 problem to start streak.'}
             </p>
           </CardContent>
         </Card>
@@ -283,7 +340,197 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         </div>
       )}
 
-      {/* Main 2-Column Section: Category Breakdown + Difficulty & Daily Targets */}
+      {/* Technical Foundations Grid: C++, SQL, Core CS Breakdown */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-semibold text-white">
+                Technical Knowledge Foundations
+              </CardTitle>
+              <CardDescription>
+                Live completion across C++, SQL, and 4 Core CS disciplines (85 topics total)
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="solved">{techStats.totalCompleted} / 85 Mastered</Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {/* C++ Essentials */}
+            <div
+              onClick={() => navigate('cpp')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-amber-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Terminal className="h-4 w-4 text-amber-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-amber-300 transition-colors">
+                    C++ Essentials
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.cpp} / 17
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-amber-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.cpp / 17) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>Pointers, OOP, STL, Memory</span>
+                <span>{Math.round((techStats.cpp / 17) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* SQL Essentials */}
+            <div
+              onClick={() => navigate('sql')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-cyan-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-cyan-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-cyan-300 transition-colors">
+                    SQL Essentials
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.sql} / 21
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-cyan-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.sql / 21) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>JOINs, Window Functions, ACID</span>
+                <span>{Math.round((techStats.sql / 21) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* Operating Systems */}
+            <div
+              onClick={() => navigate('core-cs')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-rose-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-rose-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-rose-300 transition-colors">
+                    Operating Systems
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.os} / 13
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-rose-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.os / 13) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>Processes, Scheduling, Deadlocks</span>
+                <span>{Math.round((techStats.os / 13) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* DBMS */}
+            <div
+              onClick={() => navigate('core-cs')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-emerald-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Server className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-300 transition-colors">
+                    DBMS Concepts
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.dbms} / 11
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.dbms / 11) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>Normalization, Indexes, 2PL</span>
+                <span>{Math.round((techStats.dbms / 11) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* Computer Networks */}
+            <div
+              onClick={() => navigate('core-cs')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-blue-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Network className="h-4 w-4 text-blue-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-blue-300 transition-colors">
+                    Computer Networks
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.cn} / 13
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-blue-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.cn / 13) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>OSI Layers, TCP/IP, Handshake</span>
+                <span>{Math.round((techStats.cn / 13) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* Software Engineering */}
+            <div
+              onClick={() => navigate('core-cs')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-purple-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GitBranch className="h-4 w-4 text-purple-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-purple-300 transition-colors">
+                    Software Engineering
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {techStats.se} / 10
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-purple-500 transition-all duration-500"
+                  style={{ width: `${Math.round((techStats.se / 10) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>SDLC, Scrum, Testing, SOLID</span>
+                <span>{Math.round((techStats.se / 10) * 100)}%</span>
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main 2-Column Section: DSA Category Breakdown + Difficulty & Daily Targets */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column (7 cols): DSA Category Breakdown */}
         <div className="space-y-4 lg:col-span-7">
@@ -617,7 +864,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Badge variant="outline">Module C</Badge>
+                <Badge variant="solved">Module C • Active</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
               <CardTitle className="mt-2 text-base flex items-center gap-2">
@@ -625,7 +872,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <span>C++ Placement Mastery</span>
               </CardTitle>
               <CardDescription>
-                Pointers, memory layout, STL containers, virtual tables, OOP, and modern C++.
+                17 topics: Pointers, memory layout, STL containers, virtual tables, OOP. ({techStats.cpp}/17)
               </CardDescription>
             </CardHeader>
           </Card>
@@ -637,15 +884,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Badge variant="outline">Module D</Badge>
+                <Badge variant="solved">Module D • Active</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
               <CardTitle className="mt-2 text-base flex items-center gap-2">
                 <Database className="h-4 w-4 text-cyan-400" />
-                <span>SQL Query & Schema</span>
+                <span>SQL Query & Schema Arena</span>
               </CardTitle>
               <CardDescription>
-                Complex joins, window functions, indexing, normalization, and query optimizations.
+                21 concepts & 21 practical queries: JOINs, window functions, normalization. ({techStats.sql}/21)
               </CardDescription>
             </CardHeader>
           </Card>
@@ -657,7 +904,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Badge variant="outline">Module E</Badge>
+                <Badge variant="solved">Module E • Active</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
               <CardTitle className="mt-2 text-base flex items-center gap-2">
@@ -665,7 +912,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <span>Core CS Essentials</span>
               </CardTitle>
               <CardDescription>
-                Operating Systems, DBMS, Computer Networks, and Software Engineering.
+                47 topics across DBMS (11), OS (13), Computer Networks (13), and Software Engineering (10).
               </CardDescription>
             </CardHeader>
           </Card>

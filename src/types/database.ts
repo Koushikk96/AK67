@@ -37,11 +37,17 @@ export interface ProblemProgress {
   nextRevisionDate?: string;
 }
 
+export type TopicStatus = 'not_started' | 'learning' | 'completed' | 'revise';
+
 export interface TopicProgress {
   /** Unique topic identifier (e.g., "cpp-virtual-functions", "dbms-indexing") */
   id: string;
   /** Subject category (e.g., "cpp", "sql", "os", "dbms", "cn", "se") */
   category: string;
+  /** Current learning status */
+  status?: TopicStatus;
+  /** Whether the topic is bookmarked */
+  bookmarked?: boolean;
   /** Total sub-items/checkpoints inside this topic */
   totalCheckpoints: number;
   /** Checkpoint IDs marked as understood */
