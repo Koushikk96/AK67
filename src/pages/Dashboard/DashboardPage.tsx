@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { RouteId } from '@/types/navigation';
+import { useDatabaseStats } from '@/hooks/useDatabaseStats';
 import {
   Code2,
   RotateCcw,
@@ -17,6 +18,16 @@ interface DashboardPageProps {
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
+  const { stats, loading } = useDatabaseStats();
+
+  const totalUserRecords =
+    stats.problemProgressCount +
+    stats.topicProgressCount +
+    stats.notesCount +
+    stats.mockTestsCount +
+    stats.dailyPlannerCount +
+    stats.studySessionsCount;
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -25,9 +36,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
-                Phase 1 Active • Foundation Ready
+                Phase 2 Active • IndexedDB Persistence Active
               </span>
-              <Badge variant="solved">Client Persistence</Badge>
+              <Badge variant="solved">Client Persistent</Badge>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
               Welcome to AK67
@@ -44,13 +55,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
             </Button>
             <Button variant="outline" onClick={() => navigate('settings')}>
               <HardDrive className="mr-2 h-4 w-4" />
-              Backup
+              Backup & Safety
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Metric Cards Grid (Foundational Layout) */}
+      {/* Metric Cards Grid (Real IndexedDB Data) */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -58,7 +69,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               <span>DSA Solved</span>
               <Code2 className="h-4 w-4 text-blue-400" />
             </CardDescription>
-            <CardTitle className="text-2xl font-bold">0 / 67</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {loading ? '...' : `${stats.solvedProblemsCount} / 67`}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-[11px] text-zinc-400">Curated high-yield sheet</p>
@@ -94,13 +107,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between">
-              <span>Storage Status</span>
+              <span>Device Storage</span>
               <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             </CardDescription>
-            <CardTitle className="text-2xl font-bold">Ready</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {loading ? '...' : `${totalUserRecords} Records`}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-[11px] text-zinc-400">IndexedDB local engine</p>
+            <p className="text-[11px] text-zinc-400">
+              {stats.lastBackupDate ? 'Backed up safely' : 'IndexedDB active'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -198,7 +215,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <Badge variant="easy">Storage & Safety</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
-              <CardTitle className="mt-2 text-base">Backup & Recovery</CardTitle>
+              <CardTitle className="mt-2 text-base">Backup & Recovery Center</CardTitle>
               <CardDescription>
                 Deterministic JSON export, diff preview validation, and safe merge restoration.
               </CardDescription>

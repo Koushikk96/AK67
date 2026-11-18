@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTheme } from '@/hooks/useTheme';
+import { useBackupReminder } from '@/hooks/useBackupReminder';
 import { RouteId } from '@/types/navigation';
-import { Sun, Moon, Flame, ShieldAlert, Sparkles } from 'lucide-react';
+import { Sun, Moon, Flame, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ navigate }) => {
   const { theme, toggleTheme } = useTheme();
+  const { shouldRemind, lastBackupDate } = useBackupReminder();
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-zinc-850 bg-[#09090b]/80 px-4 backdrop-blur-md lg:px-6">
@@ -64,10 +66,16 @@ export const Header: React.FC<HeaderProps> = ({ navigate }) => {
           size="sm"
           onClick={() => navigate('settings')}
           className="h-8 gap-1.5 border-zinc-800 bg-zinc-900/60 px-2.5 text-xs text-zinc-300 hover:text-white"
-          title="Data Storage and Backup Health"
+          title={shouldRemind ? 'Backup recommended' : lastBackupDate ? 'Data safely backed up' : 'Data Storage and Backup Health'}
         >
-          <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
-          <span className="hidden md:inline">Backup Health</span>
+          {shouldRemind ? (
+            <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
+          ) : (
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+          )}
+          <span className="hidden md:inline">
+            {shouldRemind ? 'Backup Due' : 'Backup Health'}
+          </span>
         </Button>
 
         {/* Theme Toggle */}

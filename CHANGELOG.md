@@ -9,11 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 2
-- Dexie.js IndexedDB database layer initialization.
-- Type-safe CRUD operations for all 8 storage tables.
-- JSON Export and safe validation/import engine (diff preview, merge vs. replace).
-- Backup reminder tracking based on activity.
+### Planned for Phase 3
+- Curated 67 DSA placement problem dataset across 11 high-yield categories.
+- DSA Problem Explorer with search, difficulty, status, and bookmark filters.
+- Problem Detail View with progressive hints, complexity breakdown, verified C++ solutions, and personal notes.
+- Dynamic Dashboard metrics connected to live IndexedDB problem records.
+
+---
+
+## [0.3.0] - 2026-11-18
+
+### Added (Phase 2: Local Data Layer & Backup Architecture)
+- Integrated Dexie.js (`^4.4.7`) and `dexie-react-hooks` (`^4.4.0`) for IndexedDB storage.
+- Implemented `AK67Database` class with all 8 planned tables: `problem_progress`, `topic_progress`, `daily_planner`, `mock_tests`, `company_profiles`, `notes`, `study_sessions`, and `app_settings`.
+- Built type-safe data access layer with 8 dedicated repository singletons in `src/db/repositories/`.
+- Created JSON Backup & Recovery Engine:
+  - `backupValidator`: Strict syntax, version, and signature verification.
+  - `backupDiff`: Dry-run diff engine showing records to merge or replace.
+  - `backupEngine`: Deterministic 1-click JSON export, non-destructive `restoreMerge`, and transactional `restoreReplace` with snapshot rollback.
+- Built interactive Backup Center in Settings:
+  - `StorageOverviewCard`: Real live counts of stored records across tables.
+  - `BackupPreviewModal`: Interactive review dialog with table breakdown and strategy selection.
+  - `BackupReminderBanner`: Dismissible, non-blocking reminder banner on Dashboard and AppShell when backup is due.
+- Added automated test suite `tests/databasePersistence.test.ts` with 47 passed assertions covering empty initialization, CRUD isolation, database reload persistence, transaction rollback, input validation, export, diffing, merge, and replace.
 
 ---
 

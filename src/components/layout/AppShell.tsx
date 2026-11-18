@@ -3,6 +3,7 @@ import { RouteId } from '@/types/navigation';
 import { Header } from '@/components/layout/Header';
 import { DesktopSidebar } from '@/components/layout/DesktopSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { BackupReminderBanner } from '@/components/backup/BackupReminderBanner';
 
 interface AppShellProps {
   currentRoute: RouteId;
@@ -21,6 +22,7 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, navigate, chil
         <Header currentRoute={currentRoute} navigate={navigate} />
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <BackupReminderBanner />
           {children}
         </main>
 
