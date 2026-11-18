@@ -9,11 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 3
-- Curated 67 DSA placement problem dataset across 11 high-yield categories.
-- DSA Problem Explorer with search, difficulty, status, and bookmark filters.
-- Problem Detail View with progressive hints, complexity breakdown, verified C++ solutions, and personal notes.
-- Dynamic Dashboard metrics connected to live IndexedDB problem records.
+### Planned for Phase 4
+- Module C: C++ Placement Mastery (Pointers, Memory Layout, OOP, STL, Modern C++, 40+ Flashcards).
+- Module D: SQL Query & Schema Mastery (Queries, Joins, Window Functions, Normalization, Indexing).
+- Module E: Core CS Fundamentals (Operating Systems, DBMS, Computer Networks, Software Engineering).
+
+---
+
+## [0.4.0] - 2026-11-18
+
+### Added (Phase 3: Dashboard & 67-Problem DSA Preparation System)
+- **Static Content Library (`src/content/dsa/`)**:
+  - Exactly 67 curated DSA problems across 11 high-yield categories (12 Arrays, 8 Strings, 5 Hashing, 6 Two Pointers/Sliding Window, 7 Sorting/Binary Search, 5 Recursion/Backtracking, 5 Linked Lists, 5 Stack/Queue, 6 Trees/BST, 5 Dynamic Programming, 3 Basic Graphs).
+  - Clean original conceptual descriptions, input/output test examples, 3-tier progressive hints, Big-O time and space complexity targets, verified C++ reference solutions, edge cases, and recruiter talking points.
+- **Curriculum Verification Test Suite (`tests/dsaCurriculum.test.ts`)**:
+  - Automated 17-assertion suite guaranteeing: 67 total problems, continuous 1..67 numbering, unique IDs, exact category quotas, balanced C++ code braces, and complete metadata.
+- **Reactive State Management (`src/hooks/useDSAProblems.ts`)**:
+  - Live synchronization between static content and local IndexedDB `problemRepository`.
+  - Computes real-time statistics: total solved, attempted, revise, bookmarked, due revisions, percentage completion, category-wise breakdowns, and difficulty breakdown.
+  - Automatic spaced revision scheduling (1, 3, 7, 21, 60 days) on mark-as-solved, with automatic logging to `study_sessions` store.
+- **Problem Detail Modal (`src/components/dsa/ProblemDetailModal.tsx`)**:
+  - Spoiler-free progressive hints revealed on user demand (Conceptual -> Data Structure -> Edge Cases & Algorithm).
+  - Modern C++ reference code with one-click clipboard copy.
+  - Complexity analysis cards and edge cases checklist.
+  - Auto-saving personal notes textarea with instant feedback and IndexedDB persistence.
+- **Interactive DSA Explorer (`src/pages/DSA/DSAPage.tsx`)**:
+  - Instant text search across problem titles, patterns, problem numbers, and concepts.
+  - 11 category selector pills with live solved/total progress counters.
+  - Multi-criteria filter dropdowns for Difficulty and Status.
+  - Interactive sorting by problem number, difficulty, or title with order flip.
+  - One-click problem solving toggle and bookmarking directly from card view.
+- **Data-Driven Dashboard (`src/pages/Dashboard/DashboardPage.tsx`)**:
+  - Real-time KPI cards: DSA Solved (`x / 67`), Study Streak (`studySessionRepository.calculateStreak()`), Due Revisions count, and Device Storage count.
+  - Curriculum progress cards with horizontal bars for all 11 DSA categories.
+  - Difficulty distribution metrics (Easy, Medium, Hard).
+  - Daily planner progress tracker (problems solved vs target and study minutes).
+  - Recent problem activity stream with relative timestamps and quick inspection modal.
+  - Spaced revision due alert banner with 1-click navigation.
+  - Quick action links to all preparation modules.
 
 ---
 
