@@ -9,10 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 5
-- Module F: Aptitude & Reasoning (Quantitative, Logical, Verbal with topic formulas and practice sets).
-- Module G: Spaced Revision System (SM-2 review queue, retention tracking, due items).
-- Module H: Daily Study Planner & Pomodoro (Daily targets, custom tasks, focus timer with IndexedDB study logging).
+### Planned for Phase 6
+- Module I: Mock Test Arena & Company Simulator (Timed placement mock tests, company-specific test patterns).
+- Module J: Interview Preparation Arena (HR interview questions, technical interview question bank, project explanation frameworks).
+
+---
+
+## [0.6.0] - 2026-11-18
+
+### Added (Phase 5: Aptitude Preparation, Spaced Revision & Daily Planner)
+- **Aptitude Preparation Curriculum (`src/content/aptitude/`)**:
+  - 36 total topics across 3 core placement aptitude areas:
+    - **Quantitative Aptitude (16)**: Percentages, Profit and Loss, SI & CI, Ratio & Proportion, Averages, Time & Work, Pipes & Cisterns, Time Speed & Distance, Problems on Trains, Mixtures & Alligation, Number Systems, HCF & LCM, Permutations & Combinations, Probability, Ages, Data Interpretation.
+    - **Logical Reasoning (10)**: Series, Coding-Decoding, Blood Relations, Direction Sense, Seating Arrangements, Syllogisms, Statement & Conclusion, Analogies, Odd One Out, Puzzles.
+    - **Verbal Ability (10)**: Reading Comprehension, Sentence Correction, Subject-Verb Agreement, Tenses, Prepositions, Articles, Synonyms & Antonyms, Para Jumbles, Error Spotting, One Word Substitution.
+  - Detailed concept theory, key mathematical formulas / grammatical rules, 2 step-by-step solved examples per topic, speed shortcuts, and common mistakes/traps.
+  - 180 practice questions (5 per topic) with 4 options, difficulty tags (Easy/Medium/Hard), verified answer keys, and step-by-step solutions.
+- **Interactive Aptitude Experience (`src/pages/Aptitude/AptitudePage.tsx`, `src/components/aptitude/AptitudeTopicModal.tsx`)**:
+  - Category filtering tabs (All, Quant, Logical, Verbal), search bar, and status filtering.
+  - Multi-tab modal: Theory & Formulas, Solved Examples, Interactive Practice Test, and Notes.
+  - Live practice test mode with instant option feedback, running score, and mathematical derivation reveal.
+  - Reactive persistence via `useAptitudeTopics.ts` to IndexedDB `topic_progress`.
+- **Spaced Revision System (`src/services/revisionService.ts`, `src/pages/Revision/RevisionPage.tsx`)**:
+  - Unified revision queue spanning all 67 DSA problems, 17 C++ topics, 21 SQL concepts, 47 Core CS topics, and 36 Aptitude topics.
+  - Spaced repetition intervals: 1d -> 3d -> 7d -> 14d -> 30d.
+  - Calendar-safe date math handling month and year rollovers without daylight saving / timezone shifts.
+  - Buckets: Due Today, Overdue, Upcoming Schedule, and Completed Revisions.
+  - Actions: Mark Revised Today, Postpone (+1d, +3d, +7d), Remove from Queue, and Early Review.
+  - Duplicate-free revision schedule guaranteed.
+- **Daily Study Planner & Targets (`src/pages/Planner/PlannerPage.tsx`, `src/hooks/useDailyPlanner.ts`)**:
+  - Daily target quota tracking: Focus study minutes, DSA problems, and Aptitude questions with live progress bars.
+  - Time-boxed checklist tasks across 10 categories (DSA, C++, SQL, DBMS, OS, Computer Networks, Software Engineering, Aptitude, Revision, Mock Test).
+  - Add task modal/form with category, topic, duration, priority, and date.
+  - Checkbox toggle for completed tasks and deletion support.
+  - Quick focus study time logger (+15m, +30m, +60m) and end-of-day reflection journal.
+- **Dashboard Synchronization (`src/pages/Dashboard/DashboardPage.tsx`)**:
+  - Today's study action items widget with inline checkbox toggling.
+  - Daily preparation targets progress widget.
+  - Due revision alert banner linking directly to revision queue.
+  - Live Aptitude readiness card (X / 36 Mastered).
+  - Preparation roadmap pillars updated to reflect active status.
+- **Automated Verification Suites**:
+  - `tests/aptitudeCurriculum.test.ts` (16 assertions, 100% passed).
+  - `tests/revisionPlanner.test.ts` (34 assertions, 100% passed).
+  - All 112 assertions across 5 test suites passing.
+  - Production build (`npm run build`) passing with zero errors.
 
 ---
 

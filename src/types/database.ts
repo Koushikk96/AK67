@@ -42,7 +42,7 @@ export type TopicStatus = 'not_started' | 'learning' | 'completed' | 'revise';
 export interface TopicProgress {
   /** Unique topic identifier (e.g., "cpp-virtual-functions", "dbms-indexing") */
   id: string;
-  /** Subject category (e.g., "cpp", "sql", "os", "dbms", "cn", "se") */
+  /** Subject category (e.g., "cpp", "sql", "os", "dbms", "cn", "se", "aptitude") */
   category: string;
   /** Current learning status */
   status?: TopicStatus;
@@ -58,7 +58,31 @@ export interface TopicProgress {
   notes: string;
   /** ISO timestamp of last study session */
   lastStudiedAt: string;
+
+  // Spaced Repetition Fields
+  /** Number of revisions completed */
+  revisionCount?: number;
+  /** Current revision interval in days (e.g., 1, 3, 7, 14, 30) */
+  intervalDays?: number;
+  /** Scheduled next revision date (YYYY-MM-DD) */
+  nextRevisionDate?: string;
+  /** ISO timestamp of most recent revision completion */
+  lastRevisedAt?: string;
+  /** Explicitly enrolled in revision queue */
+  inRevisionQueue?: boolean;
 }
+
+export type PlannerCategory =
+  | 'DSA'
+  | 'C++'
+  | 'SQL'
+  | 'DBMS'
+  | 'OS'
+  | 'Computer Networks'
+  | 'Software Engineering'
+  | 'Aptitude'
+  | 'Revision'
+  | 'Mock Test';
 
 export interface CustomTask {
   id: string;
@@ -66,6 +90,11 @@ export interface CustomTask {
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
   createdAt: string;
+  category?: PlannerCategory;
+  topic?: string;
+  targetDurationMinutes?: number;
+  plannedDate?: string;
+  completedAt?: string;
 }
 
 export interface DailyPlannerEntry {
@@ -75,6 +104,12 @@ export interface DailyPlannerEntry {
   targetProblemsCount: number;
   /** Completed problems count for this date */
   actualProblemsCount: number;
+  /** Target daily study time in minutes */
+  targetStudyMinutes?: number;
+  /** Target aptitude topics / questions count */
+  targetAptitudeCount?: number;
+  /** Completed aptitude count for this date */
+  actualAptitudeCount?: number;
   /** Custom checklist tasks */
   customTasks: CustomTask[];
   /** Total focus study minutes logged on this day */

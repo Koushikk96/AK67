@@ -4,19 +4,18 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { RouteId } from '@/types/navigation';
 import { useDSAProblems } from '@/hooks/useDSAProblems';
-import { useDatabaseStats } from '@/hooks/useDatabaseStats';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
 import { dailyPlannerRepository } from '@/db/repositories/dailyPlannerRepository';
 import { topicRepository } from '@/db/repositories/topicRepository';
 import { DailyPlannerEntry } from '@/types/database';
 import { DSAProblemWithProgress } from '@/types/dsa';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
+import { revisionService, RevisionQueueData } from '@/services/revisionService';
 import {
   Code2,
   RotateCcw,
   ArrowRight,
   Flame,
-  CheckCircle2,
   Calendar,
   Layers,
   ChevronRight,
@@ -28,6 +27,11 @@ import {
   Server,
   Network,
   GitBranch,
+  Calculator,
+  CheckSquare,
+  Square,
+  Target,
+  Clock,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -36,13 +40,21 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
   const { stats: dsaStats, problems, loading: dsaLoading, updateStatus, toggleBookmark, saveNotes, completeRevision } = useDSAProblems();
-  const { stats: dbStats, loading: dbLoading } = useDatabaseStats();
 
   const [streak, setStreak] = useState<number>(0);
   const [dailyPlanner, setDailyPlanner] = useState<DailyPlannerEntry | null>(null);
   const [selectedProblem, setSelectedProblem] = useState<DSAProblemWithProgress | null>(null);
 
-  // Real-time technical topic stats from IndexedDB
+  // Spaced revision queue data
+  const [revisionData, setRevisionData] = useState<RevisionQueueData>({
+    dueToday: [],
+    overdue: [],
+    upcoming: [],
+    completed: [],
+    totalActive: 0,
+  });
+
+  // Real-time technical & aptitude stats from IndexedDB
   const [techStats, setTechStats] = useState({
     cpp: 0,
     sql: 0,
@@ -53,69 +65,84 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
     totalCompleted: 0,
   });
 
-  // Fetch streak, daily planner, and technical topics progress
-  useEffect(() => {
-    let isMounted = true;
-    const loadLiveData = async () => {
-      try {
-        const [currentStreak, todayPlanner, allTopics] = await Promise.all([
-          studySessionRepository.calculateStreak(),
-          dailyPlannerRepository.getToday(),
-          topicRepository.getAll(),
-        ]);
+  const [aptitudeStats, setAptitudeStats] = useState({
+    quant: 0,
+    logical: 0,
+    verbal: 0,
+    totalCompleted: 0,
+  });
 
-        if (isMounted) {
-          setStreak(currentStreak);
-          setDailyPlanner(todayPlanner);
+  // Fetch streak, daily planner, revision queue, and subject progress
+  const loadLiveData = async () => {
+    try {
+      const [currentStreak, todayPlanner, allTopics, revQueue] = await Promise.all([
+        studySessionRepository.calculateStreak(),
+        dailyPlannerRepository.getToday(),
+        topicRepository.getAll(),
+        revisionService.getRevisionQueue(),
+      ]);
 
-          let cpp = 0;
-          let sql = 0;
-          let dbms = 0;
-          let os = 0;
-          let cn = 0;
-          let se = 0;
+      setStreak(currentStreak);
+      setDailyPlanner(todayPlanner);
+      setRevisionData(revQueue);
 
-          for (const t of allTopics) {
-            const isDone = t.status === 'completed' || t.isMastered;
-            if (isDone) {
-              if (t.category === 'cpp') cpp++;
-              else if (t.category === 'sql') sql++;
-              else if (t.category === 'dbms') dbms++;
-              else if (t.category === 'os') os++;
-              else if (t.category === 'cn') cn++;
-              else if (t.category === 'se') se++;
-            }
-          }
+      let cpp = 0;
+      let sql = 0;
+      let dbms = 0;
+      let os = 0;
+      let cn = 0;
+      let se = 0;
 
-          setTechStats({
-            cpp,
-            sql,
-            dbms,
-            os,
-            cn,
-            se,
-            totalCompleted: cpp + sql + dbms + os + cn + se,
-          });
+      let quant = 0;
+      let logical = 0;
+      let verbal = 0;
+
+      for (const t of allTopics) {
+        const isDone = t.status === 'completed' || t.isMastered;
+        if (isDone) {
+          if (t.category === 'cpp') cpp++;
+          else if (t.category === 'sql') sql++;
+          else if (t.category === 'dbms') dbms++;
+          else if (t.category === 'os') os++;
+          else if (t.category === 'cn') cn++;
+          else if (t.category === 'se') se++;
+          else if (t.category === 'quantitative' || t.id.startsWith('quant-')) quant++;
+          else if (t.category === 'logical' || t.id.startsWith('log-')) logical++;
+          else if (t.category === 'verbal' || t.id.startsWith('verb-')) verbal++;
         }
-      } catch (err) {
-        console.error('[DashboardPage] Error loading live data:', err);
       }
-    };
 
+      setTechStats({
+        cpp,
+        sql,
+        dbms,
+        os,
+        cn,
+        se,
+        totalCompleted: cpp + sql + dbms + os + cn + se,
+      });
+
+      setAptitudeStats({
+        quant,
+        logical,
+        verbal,
+        totalCompleted: quant + logical + verbal,
+      });
+    } catch (err) {
+      console.error('[DashboardPage] Error loading live data:', err);
+    }
+  };
+
+  useEffect(() => {
     loadLiveData();
-    return () => {
-      isMounted = false;
-    };
   }, [dsaStats.solved]);
 
-  // Total persistent records across all IndexedDB stores
-  const totalUserRecords =
-    dbStats.problemProgressCount +
-    dbStats.topicProgressCount +
-    dbStats.notesCount +
-    dbStats.mockTestsCount +
-    dbStats.dailyPlannerCount +
-    dbStats.studySessionsCount;
+  const handleToggleTask = async (taskId: string) => {
+    if (!dailyPlanner) return;
+    await dailyPlannerRepository.toggleCustomTask(dailyPlanner.id, taskId);
+    const updated = await dailyPlannerRepository.getToday();
+    setDailyPlanner(updated);
+  };
 
   // Recently attempted problems
   const recentProblems = useMemo(() => {
@@ -150,6 +177,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
     day: 'numeric',
   });
 
+  const totalRevisionsDue = revisionData.dueToday.length + revisionData.overdue.length;
+
   return (
     <div className="space-y-6">
       {/* Welcome & Command Banner */}
@@ -158,7 +187,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                Phase 4 Active • Complete Fresher Placement Prep System
+                Phase 5 Active • Complete Placement Prep System
               </span>
               <Badge variant="solved">IndexedDB Device Storage</Badge>
               {streak > 0 && (
@@ -172,7 +201,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               Placement Command Center
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed">
-              Targeted fresher preparation workspace. Zero logins, zero subscription paywalls, and complete data privacy—everything is stored persistently on your device.
+              Targeted fresher preparation workspace across DSA, C++, SQL, Core CS, Aptitude, Spaced Revision, and Daily Targets.
             </p>
           </div>
 
@@ -181,26 +210,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               <Code2 className="mr-2 h-4 w-4" />
               67 DSA Sheet
             </Button>
-            <Button variant="outline" onClick={() => navigate('cpp')}>
-              <Terminal className="mr-2 h-4 w-4 text-amber-400" />
-              C++ ({techStats.cpp}/17)
-            </Button>
-            <Button variant="outline" onClick={() => navigate('sql')}>
-              <Database className="mr-2 h-4 w-4 text-cyan-400" />
-              SQL ({techStats.sql}/21)
+            <Button variant="outline" onClick={() => navigate('aptitude')}>
+              <Calculator className="mr-2 h-4 w-4 text-blue-400" />
+              Aptitude ({aptitudeStats.totalCompleted}/36)
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('revision')}
-              className={dsaStats.dueRevisions > 0 ? 'border-purple-500/50 text-purple-300' : ''}
+              className={totalRevisionsDue > 0 ? 'border-purple-500/50 text-purple-300' : ''}
             >
               <RotateCcw className="mr-2 h-4 w-4 text-purple-400" />
               <span>Revision</span>
-              {dsaStats.dueRevisions > 0 && (
+              {totalRevisionsDue > 0 && (
                 <span className="ml-1.5 rounded-full bg-purple-500/20 px-1.5 py-0.2 text-[10px] font-bold text-purple-300">
-                  {dsaStats.dueRevisions}
+                  {totalRevisionsDue}
                 </span>
               )}
+            </Button>
+            <Button variant="outline" onClick={() => navigate('planner')}>
+              <Calendar className="mr-2 h-4 w-4 text-emerald-400" />
+              Planner
             </Button>
           </div>
         </div>
@@ -266,55 +295,69 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           </CardContent>
         </Card>
 
-        {/* Metric 3: Consistency Streak */}
+        {/* Metric 3: Aptitude Mastery */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700"
-          onClick={() => navigate('planner')}
+          onClick={() => navigate('aptitude')}
         >
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between">
-              <span className="font-medium text-zinc-300">Consistency Streak</span>
-              <Flame className="h-4 w-4 text-amber-400" />
+              <span className="font-medium text-zinc-300">Aptitude & Reasoning</span>
+              <Calculator className="h-4 w-4 text-emerald-400" />
             </CardDescription>
             <CardTitle className="text-2xl font-bold text-white">
-              {streak} {streak === 1 ? 'Day' : 'Days'}
+              {aptitudeStats.totalCompleted} / 36
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-zinc-400">
-              {streak > 0
-                ? 'Active streak! Daily momentum maintained.'
-                : 'Study or solve 1 problem to start streak.'}
+          <CardContent className="space-y-2">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-500"
+                style={{
+                  width: `${Math.round((aptitudeStats.totalCompleted / 36) * 100)}%`,
+                }}
+              />
+            </div>
+            <p className="flex justify-between text-[11px] text-zinc-400">
+              <span>Quant, Logical, Verbal</span>
+              <span>{Math.round((aptitudeStats.totalCompleted / 36) * 100)}%</span>
             </p>
           </CardContent>
         </Card>
 
-        {/* Metric 4: Device Persistent Storage */}
+        {/* Metric 4: Spaced Revision Queue */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700"
-          onClick={() => navigate('settings')}
+          onClick={() => navigate('revision')}
         >
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between">
-              <span className="font-medium text-zinc-300">Device Storage</span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <span className="font-medium text-zinc-300">Active Revision Queue</span>
+              <RotateCcw className="h-4 w-4 text-purple-400" />
             </CardDescription>
             <CardTitle className="text-2xl font-bold text-white">
-              {dbLoading ? '...' : `${totalUserRecords} Records`}
+              {totalRevisionsDue}{' '}
+              <span className="text-sm font-normal text-zinc-500">
+                / {revisionData.totalActive} active
+              </span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-[11px] text-zinc-400 truncate">
-              {dbStats.lastBackupDate
-                ? `Last backup: ${new Date(dbStats.lastBackupDate).toLocaleDateString()}`
-                : 'IndexedDB active • Backup recommended'}
+          <CardContent className="space-y-2">
+            <p className="text-[11px] text-zinc-400">
+              {revisionData.overdue.length > 0 ? (
+                <span className="text-rose-400 font-semibold">
+                  {revisionData.overdue.length} items overdue
+                </span>
+              ) : (
+                <span>All scheduled reviews on track</span>
+              )}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Due Revision Alert (if items due) */}
-      {dsaStats.dueRevisions > 0 && (
+      {/* Due Revision Alert Banner */}
+      {totalRevisionsDue > 0 && (
         <div className="flex items-center justify-between rounded-lg border border-purple-500/30 bg-purple-950/20 p-4 text-zinc-200">
           <div className="flex items-center gap-3">
             <div className="rounded-md bg-purple-500/20 p-2 text-purple-400">
@@ -322,25 +365,196 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
             </div>
             <div>
               <h4 className="text-sm font-semibold text-purple-200">
-                Spaced Revision Due Today ({dsaStats.dueRevisions} problem{dsaStats.dueRevisions > 1 ? 's' : ''})
+                Spaced Revision Due Today ({totalRevisionsDue} item{totalRevisionsDue > 1 ? 's' : ''})
               </h4>
               <p className="text-xs text-zinc-400">
-                Re-solving algorithms at planned intervals (1, 3, 7, 21, 60 days) commits problem patterns to long-term memory.
+                Active recall keeps algorithmic problem patterns and technical definitions sharp in memory.
               </p>
             </div>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate('dsa')}
+            onClick={() => navigate('revision')}
             className="border-purple-500/40 text-purple-300 hover:bg-purple-900/30 whitespace-nowrap"
           >
-            Review in DSA Sheet
+            Review Now
           </Button>
         </div>
       )}
 
-      {/* Technical Foundations Grid: C++, SQL, Core CS Breakdown */}
+      {/* Daily Study Plan & Target Progress */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column (7 cols): Today's Tasks */}
+        <div className="space-y-4 lg:col-span-7">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-semibold text-white">
+                    Today&apos;s Study Action Items
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1.5 mt-0.5">
+                    <Calendar className="h-3 w-3 text-zinc-400" />
+                    <span>{todayDateFormatted}</span>
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('planner')}
+                  className="text-xs text-blue-400 hover:text-blue-300"
+                >
+                  Open Planner <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2.5 pt-0">
+              {(!dailyPlanner?.customTasks || dailyPlanner.customTasks.length === 0) ? (
+                <div className="p-6 text-center border border-dashed border-zinc-800 rounded-lg bg-zinc-900/20 space-y-2">
+                  <p className="text-xs text-zinc-400">No tasks created for today yet.</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('planner')}
+                    className="text-xs h-7"
+                  >
+                    Add Today's Tasks
+                  </Button>
+                </div>
+              ) : (
+                dailyPlanner.customTasks.slice(0, 5).map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between p-2.5 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/70 transition-colors gap-3"
+                  >
+                    <div className="flex items-center gap-2.5 flex-1">
+                      <button
+                        onClick={() => handleToggleTask(task.id)}
+                        className="text-zinc-500 hover:text-blue-400"
+                      >
+                        {task.completed ? (
+                          <CheckSquare className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </button>
+                      <span
+                        className={`text-xs ${
+                          task.completed ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                        }`}
+                      >
+                        {task.text}
+                      </span>
+                    </div>
+                    {task.category && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        {task.category}
+                      </Badge>
+                    )}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column (5 cols): Daily Targets Progress */}
+        <div className="space-y-4 lg:col-span-5">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold text-white">
+                Daily Preparation Targets
+              </CardTitle>
+              <CardDescription>Real-time progress toward today&apos;s preparation goals</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-0">
+              {/* DSA Target */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-400 flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-blue-400" /> DSA Problems
+                  </span>
+                  <span className="font-semibold text-zinc-200">
+                    {dailyPlanner?.actualProblemsCount || 0} / {dailyPlanner?.targetProblemsCount || 3}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          ((dailyPlanner?.actualProblemsCount || 0) /
+                            (dailyPlanner?.targetProblemsCount || 3)) *
+                            100
+                        )
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Study Time */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-400 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-emerald-400" /> Focus Study Time
+                  </span>
+                  <span className="font-semibold text-zinc-200">
+                    {dailyPlanner?.studyMinutes || 0} / {dailyPlanner?.targetStudyMinutes || 60} mins
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          ((dailyPlanner?.studyMinutes || 0) /
+                            (dailyPlanner?.targetStudyMinutes || 60)) *
+                            100
+                        )
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Aptitude Target */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-400 flex items-center gap-1.5">
+                    <Calculator className="w-3.5 h-3.5 text-amber-400" /> Aptitude Questions
+                  </span>
+                  <span className="font-semibold text-zinc-200">
+                    {dailyPlanner?.actualAptitudeCount || 0} / {dailyPlanner?.targetAptitudeCount || 5}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div
+                    className="h-full bg-amber-500 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(
+                          ((dailyPlanner?.actualAptitudeCount || 0) /
+                            (dailyPlanner?.targetAptitudeCount || 5)) *
+                            100
+                        )
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Technical Foundations Breakdown */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -530,7 +744,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         </CardContent>
       </Card>
 
-      {/* Main 2-Column Section: DSA Category Breakdown + Difficulty & Daily Targets */}
+      {/* DSA Mastery & Recent Problems Section */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Left Column (7 cols): DSA Category Breakdown */}
         <div className="space-y-4 lg:col-span-7">
@@ -595,9 +809,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           </Card>
         </div>
 
-        {/* Right Column (5 cols): Difficulty Distribution & Daily Planner Target */}
+        {/* Right Column (5 cols): Difficulty Distribution */}
         <div className="space-y-6 lg:col-span-5">
-          {/* Difficulty Distribution Card */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold text-white">
@@ -654,78 +867,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               })}
             </CardContent>
           </Card>
-
-          {/* Today's Target Card */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-base font-semibold text-white">
-                    Today's Target
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-1.5 mt-0.5">
-                    <Calendar className="h-3 w-3 text-zinc-400" />
-                    <span>{todayDateFormatted}</span>
-                  </CardDescription>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('planner')}
-                  className="text-xs text-blue-400 hover:text-blue-300"
-                >
-                  Planner <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">DSA Problem Goal:</span>
-                  <span className="font-semibold text-white">
-                    {dailyPlanner?.actualProblemsCount || 0} / {dailyPlanner?.targetProblemsCount || 3} problems
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-500"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.round(
-                          ((dailyPlanner?.actualProblemsCount || 0) /
-                            (dailyPlanner?.targetProblemsCount || 3)) *
-                            100
-                        )
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
-                  <span>Focus Study Time:</span>
-                  <span className="font-medium text-zinc-300">
-                    {dailyPlanner?.studyMinutes || 0} mins logged
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs"
-                  onClick={() => navigate('dsa')}
-                >
-                  <Code2 className="mr-1.5 h-3.5 w-3.5 text-blue-400" />
-                  Solve Problems Today
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
-      {/* Recent Problem Activity Stream */}
+      {/* Recent Activity List */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -917,6 +1062,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
             </CardHeader>
           </Card>
 
+          {/* Module F: Aptitude & Reasoning */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('aptitude')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module F • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-emerald-400" />
+                <span>Aptitude & Reasoning</span>
+              </CardTitle>
+              <CardDescription>
+                36 topics: Quant (16), Logical (10), Verbal (10) with 180 practice questions. ({aptitudeStats.totalCompleted}/36)
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
           {/* Module G: Spaced Revision */}
           <Card
             className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
@@ -924,7 +1089,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Badge variant="revise">Module G</Badge>
+                <Badge variant="revise">Module G • Active</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
               <CardTitle className="mt-2 text-base flex items-center gap-2">
@@ -932,7 +1097,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <span>Spaced Revision Engine</span>
               </CardTitle>
               <CardDescription>
-                Automatic intervals (1, 3, 7, 21, 60 days) to prevent forgetting algorithms.
+                Automatic intervals (1d $\to$ 3d $\to$ 7d $\to$ 14d $\to$ 30d) for active recall. ({totalRevisionsDue} Due)
               </CardDescription>
             </CardHeader>
           </Card>
@@ -944,7 +1109,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Badge variant="outline">Module H</Badge>
+                <Badge variant="outline">Module H • Active</Badge>
                 <ArrowRight className="h-4 w-4 text-zinc-400" />
               </div>
               <CardTitle className="mt-2 text-base flex items-center gap-2">
