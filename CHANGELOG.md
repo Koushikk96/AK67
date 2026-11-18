@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Confirmed study time is derived solely from `study_sessions` with zero double-counting.
 - **Cloudflare Pages Free Hosting Configuration**:
   - Configured Cloudflare Pages native SPA routing (`not_found_handling: "single-page-application"`), eliminating redundant `_redirects` rules and resolving infinite redirect loops (Cloudflare code 100324).
+  - Synchronized Cloudflare deployment settings as code via `wrangler.jsonc` (`name: "ak67"`, `directory: "./dist"`, `not_found_handling: "single-page-application"`).
   - Configured `public/robots.txt`.
 - **Automated Verification Test Suite (`tests/finalQAAndIntegrity.test.ts`)**:
   - Added comprehensive 1,213-assertion test suite.

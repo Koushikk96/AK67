@@ -539,6 +539,16 @@ async function runFinalQASuite() {
   assert(!fs.existsSync(routesJsonPath), '9b. Redundant public/_routes.json removed for pure static SPA');
   assert(fs.existsSync(robotsTxtPath), '9c. public/robots.txt exists');
 
+  const wranglerPath = path.join(cwd, 'wrangler.jsonc');
+  assert(fs.existsSync(wranglerPath), '9d. wrangler.jsonc exists in repository root');
+  const wranglerConfig = JSON.parse(fs.readFileSync(wranglerPath, 'utf-8'));
+  assert(wranglerConfig.name === 'ak67', '9e. wrangler.jsonc specifies project name "ak67"');
+  assert(wranglerConfig.assets?.directory === './dist', '9f. wrangler.jsonc specifies assets.directory as "./dist"');
+  assert(
+    wranglerConfig.assets?.not_found_handling === 'single-page-application',
+    '9g. wrangler.jsonc specifies native SPA fallback (not_found_handling: "single-page-application")'
+  );
+
   console.log('\n======================================================');
   console.log(`Phase 9 Final QA Summary: ${passedCount} PASSED, 0 FAILED`);
   console.log('======================================================\n');
