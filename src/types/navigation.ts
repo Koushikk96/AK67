@@ -1,0 +1,27 @@
+export type NavSection = 'core' | 'practice' | 'assessment' | 'personal';
+
+export type RouteId =
+  | 'dashboard'
+  | 'dsa'
+  | 'cpp'
+  | 'sql'
+  | 'core-cs'
+  | 'aptitude'
+  | 'revision'
+  | 'planner'
+  | 'mock-tests'
+  | 'interview'
+  | 'companies'
+  | 'analytics'
+  | 'notes'
+  | 'settings';
+
+export interface NavItem {
+  id: RouteId;
+  label: string;
+  shortLabel?: string;
+  section: NavSection;
+  iconName: string;
+  badge?: string;
+  description: string;
+}

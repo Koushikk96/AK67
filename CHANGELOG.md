@@ -9,12 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 1
-- Vite + React + TypeScript scaffolding.
-- Tailwind CSS styling and theme tokens configuration.
-- Base design system primitives (buttons, badges, cards, inputs).
-- Responsive App Shell (desktop collapsible sidebar, mobile bottom navigation).
-- Client-side routing for all 13 modules.
+### Planned for Phase 2
+- Dexie.js IndexedDB database layer initialization.
+- Type-safe CRUD operations for all 8 storage tables.
+- JSON Export and safe validation/import engine (diff preview, merge vs. replace).
+- Backup reminder tracking based on activity.
+
+---
+
+## [0.2.0] - 2026-11-18
+
+### Added (Phase 1: Application Skeleton, Tooling & Design System)
+- Initialized modern build pipeline with React 18.3.1, Vite 6.1.0, and strict TypeScript 5.7.3.
+- Configured Tailwind CSS with custom charcoal tokens, zinc borders, and dark/light mode palette matching `DESIGN_SYSTEM.md`.
+- Implemented `useTheme` hook with immediate `localStorage` fallback and document element class synchronization.
+- Created accessible shadcn/ui style components: `Button`, `Badge`, `Card`, and dynamic `NavIcon`.
+- Built responsive App Shell:
+  - Sticky header with placement target pill, active streak pill, backup reminder, and theme toggle.
+  - Desktop collapsible sidebar with categorized section hierarchy and storage health status.
+  - Mobile bottom navigation with 4 primary targets and slide-up drawer for secondary modules.
+- Created zero-dependency hash router (`useRouter`) with history synchronization.
+- Created clean placeholder views for all 13 application modules and settings.
+- Verified TypeScript compilation and production build (`npm run build`) passing with zero errors.
 
 ---
 
