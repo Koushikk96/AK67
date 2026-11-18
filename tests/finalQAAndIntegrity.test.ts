@@ -526,24 +526,18 @@ async function runFinalQASuite() {
   assert(allNotes.length === 2, '8c. noteRepository returns both notes and mistakes');
 
   // -------------------------------------------------------------
-  // 9. Production Files & Cloudflare Pages SPA Routing
+  // 9. Production Files & Cloudflare Native SPA Routing Verification
   // -------------------------------------------------------------
-  console.log('\n--- 9. Production PWA & Cloudflare Pages Configuration ---');
+  console.log('\n--- 9. Production Files & Cloudflare Native SPA Configuration ---');
 
   const cwd = process.cwd();
   const redirectsPath = path.join(cwd, 'public', '_redirects');
   const routesJsonPath = path.join(cwd, 'public', '_routes.json');
   const robotsTxtPath = path.join(cwd, 'public', 'robots.txt');
 
-  assert(fs.existsSync(redirectsPath), '9a. public/_redirects exists for Cloudflare Pages SPA routing');
-  const redirectsContent = fs.readFileSync(redirectsPath, 'utf8');
-  assert(
-    redirectsContent.includes('/*') && redirectsContent.includes('/index.html') && redirectsContent.includes('200'),
-    '9b. public/_redirects rewrites all routes to /index.html with status 200'
-  );
-
-  assert(fs.existsSync(routesJsonPath), '9c. public/_routes.json exists for Cloudflare Pages routing');
-  assert(fs.existsSync(robotsTxtPath), '9d. public/robots.txt exists');
+  assert(!fs.existsSync(redirectsPath), '9a. Conflicting public/_redirects removed (prevents Cloudflare loop 100324)');
+  assert(!fs.existsSync(routesJsonPath), '9b. Redundant public/_routes.json removed for pure static SPA');
+  assert(fs.existsSync(robotsTxtPath), '9c. public/robots.txt exists');
 
   console.log('\n======================================================');
   console.log(`Phase 9 Final QA Summary: ${passedCount} PASSED, 0 FAILED`);

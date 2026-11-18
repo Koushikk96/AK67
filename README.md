@@ -195,7 +195,7 @@ AK67 is designed for ₹0 permanent hosting using **Cloudflare Pages**:
 4. **Deploy**:
    - Click **"Save and Deploy"**.
    - Cloudflare Pages builds static assets into `dist/`.
-   - The included `public/_redirects` (`/* /index.html 200`) and `public/_routes.json` ensure single-page hash routing functions without 404s.
+   - Cloudflare Pages uses native SPA fallback (`not_found_handling: "single-page-application"`), ensuring single-page routing functions seamlessly across all paths and refreshes.
    - Access the live application via your generated `*.pages.dev` URL or attach your free custom domain.
 
 ---

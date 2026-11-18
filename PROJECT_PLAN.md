@@ -189,7 +189,7 @@ This document outlines the architectural roadmap, phase breakdown, verification 
   - Strict IndexedDB isolation guaranteed.
 - Cloudflare Pages build and deployment setup:
   - Vite production build configured (`npm run build` -> `dist`).
-  - Added `_redirects` (`/* /index.html 200`) and `_routes.json` for seamless SPA client-side routing on Cloudflare Pages.
+  - Configured Cloudflare Pages native SPA routing (`not_found_handling: "single-page-application"`), eliminating redundant redirect rules.
   - Generated `robots.txt`.
 - Created comprehensive Phase 9 Final QA test suite (`tests/finalQAAndIntegrity.test.ts`) passing 1,213 assertions. Total project test suite now passes over 1,500 assertions.
 - Public URL verification.

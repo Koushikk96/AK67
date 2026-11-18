@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Confirmed subjects with 0 test attempts return `undefined` rather than 0% to prevent classifying lack of data as poor performance.
   - Confirmed study time is derived solely from `study_sessions` with zero double-counting.
 - **Cloudflare Pages Free Hosting Configuration**:
-  - Configured `public/_redirects` (`/* /index.html 200`) and `public/_routes.json` ensuring seamless SPA routing without 404s on refresh.
+  - Configured Cloudflare Pages native SPA routing (`not_found_handling: "single-page-application"`), eliminating redundant `_redirects` rules and resolving infinite redirect loops (Cloudflare code 100324).
   - Configured `public/robots.txt`.
 - **Automated Verification Test Suite (`tests/finalQAAndIntegrity.test.ts`)**:
   - Added comprehensive 1,213-assertion test suite.

@@ -326,7 +326,7 @@ This document maintains real-time records of implemented phases, active mileston
 - **Separation of Personal Notes and Mistake Repository**:
   - Verified `noteRepository.getAll` returns all notes while `useNotes` filters out `isMistakeLog === true` and `mistakeService` returns only `isMistakeLog === true`.
 - **Cloudflare Pages Free Hosting Configuration**:
-  - Configured `public/_redirects` (`/* /index.html 200`) and `public/_routes.json` ensuring seamless SPA routing without 404s on refresh.
+  - Configured Cloudflare Pages native SPA routing (`not_found_handling: "single-page-application"`), eliminating redundant `_redirects` rules.
   - Configured `public/robots.txt`.
 - **Automated Verification Test Suite (`tests/finalQAAndIntegrity.test.ts`)**:
   - Built comprehensive 1,213-assertion test suite covering curriculum counts, MCQ pools, IndexedDB schema migration, backup restore, session recovery, active protection, analytics, and Cloudflare Pages configuration.
