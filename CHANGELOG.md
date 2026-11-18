@@ -9,10 +9,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 8
-- Progressive Web App (PWA) manifest and icons.
-- Offline Service Worker with caching strategies.
-- Offline status banner and update notification.
+### Planned for Phase 9
+- Comprehensive end-to-end quality assurance and responsiveness audit.
+- Data persistence verification across refresh, browser restart, and profile switches.
+- Performance & accessibility audit via Lighthouse.
+- Cloudflare Pages build and deployment setup (`_routes.json` / `_redirects`).
+
+---
+
+## [0.9.0] - 2026-11-18
+
+### Added (Phase 8: Progressive Web App & Offline Excellence)
+- **PWA Infrastructure & Web App Manifest (`vite.config.ts`, `index.html`)**:
+  - Integrated `vite-plugin-pwa@^2.0.0` and `workbox-window@^7.4.1` with Vite 6.
+  - Configured Web App Manifest: name "AK67 — Your Placement Preparation System", short_name "AK67", theme_color `#09090b`, background_color `#09090b`, standalone display, portrait orientation, start_url `/`, and categories `['education', 'productivity']`.
+  - Added HTML meta tags for mobile web app capability and apple-touch-icon.
+- **Brand PNG Icons System (`public/`)**:
+  - Generated full suite of PWA icon assets: `pwa-192x192.png`, `pwa-512x512.png`, `maskable-icon-512x512.png`, `apple-touch-icon.png`, `apple-touch-icon-180x180.png`, and `favicon-64x64.png`.
+- **Workbox Service Worker Caching Strategies (`vite.config.ts`)**:
+  - Precaching rules for HTML, CSS, JS, fonts, and icons with automated cache cleanup (`cleanupOutdatedCaches: true`).
+  - Stale-while-revalidate caching strategy for scripts and stylesheets.
+  - Cache-first caching strategy for images and icons.
+  - Navigation route fallback for single-page client routing.
+- **PWA Lifecycle Hooks & Utilities (`src/hooks/`, `src/utils/`)**:
+  - `src/utils/pwaUtils.ts`: Assessment active detection (`isAssessmentActive()`) and standalone mode detector (`isStandaloneMode()`).
+  - `src/hooks/useNetworkStatus.ts`: Real-time reactive network state tracking online, offline, and reconnected indicators.
+  - `src/hooks/usePWAInstall.ts`: Captures `beforeinstallprompt`, tracks installability, prompts installation, and detects device platform.
+  - `src/hooks/usePWAUpdate.ts`: Safe service worker update registration with `registerType: 'prompt'`, automated assessment deferral protection, and manual update check.
+- **PWA User Interface Elements (`src/components/pwa/`, `src/components/layout/`)**:
+  - `NetworkStatusBanner`: Top non-intrusive status banner displaying offline warning with IndexedDB safety guarantee and reconnected confirmation.
+  - `PWAInstallBanner`: Non-intrusive floating install prompt with 1-click install and dismiss action.
+  - `PWAUpdateToast`: Non-blocking prompt for new app version updates with "Update Now" and "Later" options.
+  - `Header`: Added live offline indicator dot and quick-install action button.
+- **PWA Management Panel in Settings (`src/pages/Settings/SettingsPage.tsx`)**:
+  - Displays version `v0.9.0`, network connectivity, Workbox caching status, and display mode.
+  - "Check for Updates" trigger with immediate feedback.
+  - "Install AK67" button for immediate installation.
+  - Step-by-step installation guides for Android (Chrome), Desktop (Chrome/Edge), and iOS (Safari).
+- **Automated Verification Test Suite (`tests/pwaAndOffline.test.ts`)**:
+  - 61 assertions covering icon assets, manifest schema, service worker configuration, 100% offline curriculum bundling, offline IndexedDB CRUD, offline backup export/restore, and assessment protection.
+  - 100% pass rate across all 8 test suites (295 / 295 total assertions passed).
+  - Production build (`npm run build`) passing with zero errors.
 
 ---
 

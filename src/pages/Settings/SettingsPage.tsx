@@ -4,6 +4,9 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/hooks/useTheme';
 import { useDatabaseStats } from '@/hooks/useDatabaseStats';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { usePWAUpdate } from '@/hooks/usePWAUpdate';
 import { backupValidator } from '@/services/backup/backupValidator';
 import { backupDiff } from '@/services/backup/backupDiff';
 import { backupEngine } from '@/services/backup/backupEngine';
@@ -21,11 +24,19 @@ import {
   FileCheck,
   RefreshCw,
   XCircle,
+  Wifi,
+  WifiOff,
+  Smartphone,
+  Monitor,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { stats, loading: statsLoading, refreshStats } = useDatabaseStats();
+  const { networkState, isOffline } = useNetworkStatus();
+  const { isInstallable, isInstalled, platform, promptInstall } = usePWAInstall();
+  const { registrationStatus, lastUpdated, checkForUpdates, needRefresh } = usePWAUpdate();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,6 +45,25 @@ export const SettingsPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pendingDiff, setPendingDiff] = useState<BackupDiffAnalysis | null>(null);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [updateCheckStatus, setUpdateCheckStatus] = useState<string | null>(null);
+
+  const handleCheckUpdate = async () => {
+    setIsCheckingUpdate(true);
+    setUpdateCheckStatus(null);
+    try {
+      const hasUpdate = await checkForUpdates();
+      if (hasUpdate || needRefresh) {
+        setUpdateCheckStatus('Update found! You will be prompted to apply the update.');
+      } else {
+        setUpdateCheckStatus('You are already running the latest version of AK67.');
+      }
+    } catch {
+      setUpdateCheckStatus('Could not verify updates (offline). Cached version is active.');
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
 
   // 1. Handle JSON Export
   const handleExportBackup = async () => {
@@ -258,6 +288,154 @@ export const SettingsPage: React.FC = () => {
               <FileCheck className="h-3.5 w-3.5 text-blue-400" />
               Select Backup File to Restore
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Progressive Web App & Offline Architecture */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-200">Progressive Web App & Offline System</h3>
+            <p className="text-xs text-zinc-400">Offline service worker caching and native device installation</p>
+          </div>
+          <Badge variant={isInstalled ? 'solved' : 'outline'}>
+            {isInstalled ? 'Standalone Mode' : 'Browser Mode'}
+          </Badge>
+        </div>
+
+        <Card className="border-zinc-800 bg-[#121215]">
+          <CardContent className="p-5 space-y-5">
+            {/* Grid of 4 PWA Indicators */}
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {/* 1. App Version */}
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                <span className="text-[11px] text-zinc-400">Application Version</span>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="font-mono text-sm font-bold text-white">v0.8.0</span>
+                  <Badge variant="solved" className="text-[10px]">Phase 8</Badge>
+                </div>
+              </div>
+
+              {/* 2. Network Status */}
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                <span className="text-[11px] text-zinc-400">Connectivity Status</span>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                    {isOffline ? (
+                      <>
+                        <WifiOff className="h-3.5 w-3.5 text-amber-400" />
+                        <span>Offline</span>
+                      </>
+                    ) : (
+                      <>
+                        <Wifi className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>Online</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    {networkState}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3. Service Worker Status */}
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                <span className="text-[11px] text-zinc-400">Offline Caching Engine</span>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>Workbox Ready</span>
+                  </span>
+                  <span className="text-[10px] text-zinc-500">
+                    {registrationStatus}
+                  </span>
+                </div>
+              </div>
+
+              {/* 4. Installation Status */}
+              <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+                <span className="text-[11px] text-zinc-400">Installation Mode</span>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+                    {isInstalled ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>Installed</span>
+                      </>
+                    ) : (
+                      <>
+                        <Monitor className="h-3.5 w-3.5 text-zinc-400" />
+                        <span>Web Browser</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="text-[10px] text-zinc-500 capitalize">{platform}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions: Update Check & Install Prompt */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-zinc-800/80">
+              <div className="text-xs text-zinc-400">
+                {lastUpdated ? (
+                  <span>Last cached build: {new Date(lastUpdated).toLocaleString()}</span>
+                ) : (
+                  <span>Cached bundle active and verified</span>
+                )}
+                {updateCheckStatus && (
+                  <p className="mt-0.5 text-xs text-blue-400 font-medium">{updateCheckStatus}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isInstallable && !isInstalled && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={promptInstall}
+                    className="h-8 gap-1.5 text-xs bg-blue-600 hover:bg-blue-500"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Install AK67
+                  </Button>
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCheckUpdate}
+                  disabled={isCheckingUpdate}
+                  className="h-8 gap-1.5 text-xs border-zinc-700 bg-zinc-900/80 text-zinc-300 hover:text-white"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
+                  <span>{isCheckingUpdate ? 'Checking...' : 'Check for Updates'}</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Platform Installation Guide Details */}
+            <div className="rounded-lg border border-zinc-800/80 bg-zinc-900/30 p-4 space-y-2.5 text-xs">
+              <h4 className="font-semibold text-zinc-200 flex items-center gap-2">
+                <Smartphone className="h-4 w-4 text-blue-400" />
+                <span>How to Install AK67 on Your Device</span>
+              </h4>
+              <div className="grid gap-2.5 sm:grid-cols-3 text-zinc-400 text-[11px]">
+                <div className="space-y-1">
+                  <strong className="text-zinc-300 block">Android (Chrome)</strong>
+                  <p>Tap the 3-dots menu in Chrome $\to$ Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</p>
+                </div>
+                <div className="space-y-1">
+                  <strong className="text-zinc-300 block">Desktop (Chrome / Edge)</strong>
+                  <p>Click the <strong>Install icon</strong> in the right side of the address bar $\to$ Click <strong>Install</strong>.</p>
+                </div>
+                <div className="space-y-1">
+                  <strong className="text-zinc-300 block">iOS (Safari)</strong>
+                  <p>Tap the <strong>Share button</strong> in Safari $\to$ Scroll down and tap <strong>"Add to Home Screen"</strong>.</p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -4,6 +4,9 @@ import { Header } from '@/components/layout/Header';
 import { DesktopSidebar } from '@/components/layout/DesktopSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { BackupReminderBanner } from '@/components/backup/BackupReminderBanner';
+import { NetworkStatusBanner } from '@/components/pwa/NetworkStatusBanner';
+import { PWAInstallBanner } from '@/components/pwa/PWAInstallBanner';
+import { PWAUpdateToast } from '@/components/pwa/PWAUpdateToast';
 
 interface AppShellProps {
   currentRoute: RouteId;
@@ -22,9 +25,14 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, navigate, chil
         <Header currentRoute={currentRoute} navigate={navigate} />
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+          <NetworkStatusBanner />
+          <PWAInstallBanner />
           <BackupReminderBanner />
           {children}
         </main>
+
+        {/* Floating PWA Update Notification */}
+        <PWAUpdateToast />
 
         {/* Mobile Fixed Bottom Navigation */}
         <MobileBottomNav currentRoute={currentRoute} navigate={navigate} />

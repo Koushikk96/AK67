@@ -19,6 +19,7 @@ This document defines the functional and user experience specifications for each
 11. [Module K: Company Preparation & Drive Tracker](#module-k-company-preparation)
 12. [Module L: Placement Readiness Analytics](#module-l-placement-readiness-analytics)
 13. [Module M: Notes, Bookmarks & Mistake Repository](#module-m-notes-bookmarks--mistakes)
+14. [Module N: Progressive Web App & Offline Excellence](#module-n-progressive-web-app--offline-excellence)
 
 ---
 
@@ -316,3 +317,35 @@ Give students a personal knowledge repository to record epiphanies, save code sn
   - Search and filter by subject, category, and review status.
 - **One-Click Bookmarks View**:
   - Filter and review all problems, SQL queries, or interview questions bookmarked across the application.
+
+---
+
+## Module N: Progressive Web App & Offline Excellence *(Implemented in Phase 8)*
+
+### Purpose
+Transform AK67 into an installable, 100% offline-resilient Progressive Web App running natively on Android devices, laptops, and desktop browsers without any server dependency or cloud accounts.
+
+### Features
+- **PWA Installation Experience**:
+  - Standard compliant Web App Manifest (`manifest.webmanifest`) with standalone display mode, portrait orientation, and `#09090b` theme.
+  - Native browser install prompt trigger via `usePWAInstall` hook.
+  - Unobtrusive install action in navigation header and dedicated install banner with dismiss options.
+  - Standalone mode detection (`window.matchMedia('(display-mode: standalone)')`).
+- **Complete Offline Operations**:
+  - Entire 188-item placement curriculum (67 DSA, 17 C++, 21 SQL, 47 Core CS, 36 Aptitude), 282 MCQs, 100 interview questions, and 10 company profiles bundled client-side.
+  - All IndexedDB CRUD actions (solving problems, taking mock tests, writing notes, logging mistakes) function identically online and offline.
+  - Full JSON backup export and restore function 100% offline via browser Blob and `FileReader` APIs.
+- **Service Worker & Workbox Caching**:
+  - Workbox Service Worker caching static assets (HTML, CSS, JS, fonts) with `cleanupOutdatedCaches`.
+  - Stale-while-revalidate runtime caching for scripts and styles; Cache-first strategy for brand icons and images.
+  - Strict IndexedDB isolation: Workbox manages static asset caches only and never alters or purges IndexedDB.
+- **Assessment Interruption Protection**:
+  - Checks `ak67_active_test_session` in local state.
+  - Automatically defers service worker update toasts during active timed mock tests to protect candidate test flow and state.
+- **Network Status Monitoring**:
+  - Real-time reactive indicator (`useNetworkStatus`) displaying `Online`, `Offline (IndexedDB active)`, or `Connection Restored`.
+  - Non-intrusive status banner positioned at top of application shell.
+- **PWA Management in Settings**:
+  - App version `v0.9.0`, current connectivity state, Workbox caching status, and display mode.
+  - Manual "Check for Updates" trigger with immediate feedback.
+  - Platform-specific installation guides for Android, Desktop (Chrome/Edge), and iOS (Safari).

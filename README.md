@@ -147,6 +147,25 @@ npm run preview
 - **Backup Reminder**: AK67 monitors your study volume and prompts you to download a timestamped `.json` backup file.
 - **Restoration Validation**: Every uploaded backup undergoes schema verification, version checking, and presents a dry-run diff (showing items to add, modify, or merge) before committing to IndexedDB.
 - **Zero Cloud Leak**: None of your notes, code attempts, or mock test results are sent to an external server.
+- **Offline Backup & Restoration**: Exporting and restoring JSON backups works completely offline with zero network connectivity using browser Blob URLs and `FileReader`.
+
+---
+
+## 📱 Progressive Web App (PWA) & Offline Capability
+
+AK67 is a fully compliant, installable Progressive Web App built with `vite-plugin-pwa` and Workbox:
+
+### Key Offline Features
+- **100% Offline Curriculum**: All 188 curriculum items (67 DSA problems with solutions, 17 C++ topics, 21 SQL queries, 47 Core CS modules, 36 Aptitude lessons), 282 MCQs, 100 interview questions, and 10 company profiles are bundled client-side.
+- **Workbox Service Worker**: Precaches the entire application shell, styles, scripts, and fonts.
+- **IndexedDB Isolation**: Cache clearing, service worker updates, or network switches **never** wipe or interfere with user progress, notes, or test results stored in IndexedDB.
+- **Assessment Interruption Protection**: Service worker updates are safely held back whenever a student is actively taking a timed mock test or coding assessment.
+- **Network Status Bar**: Real-time non-intrusive status bar indicating `Online`, `Offline (IndexedDB active)`, or `Connection Restored`.
+
+### How to Install
+- **Android (Chrome)**: Tap the "Install AK67" header button or browser menu `⋮` -> "Install app" / "Add to Home screen".
+- **Desktop (Chrome/Edge)**: Click the Install icon in the browser address bar or the "Install AK67" button in Settings.
+- **iOS (Safari)**: Tap the Share button `􀈂` -> "Add to Home Screen".
 
 ---
 

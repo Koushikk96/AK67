@@ -114,3 +114,19 @@ Implemented via [src/hooks/useBackupReminder.ts](file:///d:/Projects/AK67/src/ho
   - User has solved $\ge 3$ problems without creating a backup.
 - **Non-Intrusive**: Dismissible for 2 days; never blocks normal app navigation.
 - **1-Click Download**: Embedded directly in the reminder banner.
+
+---
+
+## 📱 PWA Offline Backup & Strict IndexedDB Isolation
+
+### 1. IndexedDB Isolation Guarantee
+Under the Progressive Web App architecture implemented in Phase 8:
+- **Workbox Service Worker Boundary**: The service worker manages cache storage (`CacheStorage` API) strictly for static application code (HTML, CSS, JS bundles, Web fonts, brand icons).
+- **Zero IndexedDB Access**: Workbox service workers do **not** intercept, inspect, or manage IndexedDB.
+- **Persistence Across SW Updates**: When a new service worker version activates or when outdated caches are purged (`cleanupOutdatedCaches: true`), the browser's IndexedDB database (`AK67_Database`) remains **100% untouched and preserved**.
+
+### 2. 100% Offline Backup Export & Restoration
+Backup and restore operations do not require internet access:
+- **Offline Export**: The JSON serializer queries IndexedDB directly on the client, constructs a serialized `Blob`, generates an in-memory `URL.createObjectURL(blob)`, and triggers an instant download without making any network requests.
+- **Offline Import & Diff**: The backup file is parsed locally using the browser's `FileReader` API. Schema validation, dry-run diff analysis against live IndexedDB data, and the interactive comparison modal execute completely offline.
+- **Offline Commit**: Both `restoreMerge` and `restoreReplace` operate within local Dexie.js ACID transactions directly on the device.

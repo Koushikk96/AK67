@@ -1,8 +1,19 @@
 import React from 'react';
 import { useTheme } from '@/hooks/useTheme';
 import { useBackupReminder } from '@/hooks/useBackupReminder';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { RouteId } from '@/types/navigation';
-import { Sun, Moon, Flame, ShieldAlert, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  Sun,
+  Moon,
+  Flame,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  WifiOff,
+  Download,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 interface HeaderProps {
@@ -14,6 +25,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ navigate }) => {
   const { theme, toggleTheme } = useTheme();
   const { shouldRemind, lastBackupDate } = useBackupReminder();
+  const { isOffline } = useNetworkStatus();
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-zinc-850 bg-[#09090b]/80 px-4 backdrop-blur-md lg:px-6">
@@ -40,6 +53,32 @@ export const Header: React.FC<HeaderProps> = ({ navigate }) => {
 
       {/* Right Action Area */}
       <div className="flex items-center gap-2">
+        {/* Offline State Indicator */}
+        {isOffline && (
+          <div
+            onClick={() => navigate('settings')}
+            className="flex cursor-pointer items-center gap-1 rounded-full border border-amber-500/40 bg-amber-950/30 px-2 py-1 text-xs font-medium text-amber-300"
+            title="Working offline — IndexedDB active"
+          >
+            <WifiOff className="h-3 w-3 text-amber-400" />
+            <span className="hidden sm:inline text-[11px]">Offline</span>
+          </div>
+        )}
+
+        {/* Install PWA Button (when installable) */}
+        {isInstallable && !isInstalled && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={promptInstall}
+            className="h-8 gap-1.5 border-blue-500/40 bg-blue-950/20 px-2.5 text-xs text-blue-300 hover:bg-blue-900/30"
+            title="Install AK67 App"
+          >
+            <Download className="h-3.5 w-3.5 text-blue-400" />
+            <span className="hidden sm:inline">Install</span>
+          </Button>
+        )}
+
         {/* Study Streak Pill */}
         <div 
           onClick={() => navigate('planner')}

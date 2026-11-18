@@ -153,18 +153,25 @@ This document outlines the architectural roadmap, phase breakdown, verification 
   - Dedicated "Mistake Log" to document algorithmic errors, conceptual misunderstandings, and exam traps.
   - Instant search across all personal notes, bookmarks, and logs.
 
-### Phase 8: Progressive Web App (PWA) & Offline Excellence
-- Configure `vite-plugin-pwa` with Workbox caching strategies:
+### Phase 8: Progressive Web App (PWA) & Offline Excellence *(Completed)*
+- Configured `vite-plugin-pwa` with Workbox caching strategies:
   - Cache-first strategy for static application assets (HTML, CSS, JS, fonts).
-  - Stale-while-revalidate for dynamic content assets.
-  - Offline fallback page.
-- Generate high-resolution icons (192x192, 512x512, maskable) and web manifest:
+  - Stale-while-revalidate for runtime chunks and scripts.
+  - Cache-first for images and brand icons.
+  - SPA navigation fallback to `/index.html`.
+  - Automated cache cleanup (`cleanupOutdatedCaches: true`).
+- Generated high-resolution icons (192x192, 512x512, maskable 512x512, apple-touch-icon 180x180, favicon 64x64) and web manifest:
+  - App Name: `AK67 — Your Placement Preparation System`.
+  - Short Name: `AK67`.
   - Display: `standalone`.
   - Theme color: `#09090b` (Dark charcoal).
   - Background color: `#09090b`.
-- Service worker lifecycle handling (update notification with user prompt).
-- Verify Android Chrome "Add to Home screen" / install prompt and desktop PWA installability.
-- Offline resilience tests: complete app functionality without internet connection.
+  - Orientation: `portrait`.
+- Implemented safe service worker lifecycle handling (`registerType: 'prompt'`) with user-facing update toast.
+- Built active assessment protection: automatically defers update notifications during timed mock tests.
+- Built network status bar (`useNetworkStatus`) and install promotion banner/header button (`usePWAInstall`).
+- Added PWA & Offline management panel in Settings (`src/pages/Settings/SettingsPage.tsx`).
+- Created automated PWA & Offline verification suite (`tests/pwaAndOffline.test.ts`) passing 61/61 assertions.
 
 ### Phase 9: Quality Assurance, Verification & Deployment
 - Comprehensive end-to-end verification across desktop and mobile screen widths.
