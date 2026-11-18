@@ -13,6 +13,7 @@ Because AK67 is a **zero-cost, zero-backend, client-first application**, all use
 2. **Browser Data Clearing**: Using "Clear Browsing Data" or "Clear Cookies and Site Data" in Chrome/Edge/Firefox wipes IndexedDB.
 3. **Private / Incognito Browsing**: Incognito windows use temporary storage that is destroyed as soon as the window closes.
 4. **Device Damage or Loss**: If a phone or laptop is lost or damaged without an exported backup, progress cannot be recovered from any server.
+5. **Deployment Isolation**: Deploying updates or hosting AK67 on Cloudflare Pages does **not** alter or erase your device's IndexedDB, but all data remains local to each individual device profile. Frequent JSON backups are mandatory to ensure long-term data safety.
 
 ---
 
