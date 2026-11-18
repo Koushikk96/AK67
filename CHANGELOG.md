@@ -9,9 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for Phase 6
-- Module I: Mock Test Arena & Company Simulator (Timed placement mock tests, company-specific test patterns).
-- Module J: Interview Preparation Arena (HR interview questions, technical interview question bank, project explanation frameworks).
+### Planned for Phase 7
+- Module L: Placement Analytics & Weak Area Diagnosis (readiness score, radar charts, category mastery breakdown).
+- Module M: Personal Notes, Formulas & Mistake Log Repository.
+
+---
+
+## [0.7.0] - 2026-11-18
+
+### Added (Phase 6: Mock Tests & Interview Preparation)
+- **Technical MCQ Question Bank (`src/content/mcq/`)**:
+  - 102 verified placement multiple-choice questions across 7 technical subjects: C++ (15), OOP (15), DBMS (15), SQL (15), OS (15), Computer Networks (15), Software Engineering (12).
+  - Every question includes 4 choices, single valid correct index (0-3), detailed technical derivation/explanation, and difficulty rating.
+  - Zero duplicate question IDs across the entire application (282 total MCQs across Aptitude + Technical pools).
+- **Assessment Engine & Mock Test Centre (`src/services/mockTestService.ts`, `src/pages/MockTests/MockTestsPage.tsx`, `src/hooks/useMockTests.ts`)**:
+  - 4 Predefined standard tests: 15-min quick placement drill, 30-min aptitude test, 30-min core technical test, 60-min full placement mock.
+  - Custom test generator modal: custom title, category, question count (10-50), duration (10-60m), difficulty, and negative marking toggle.
+  - Active test mode: wall-clock timestamp resilient countdown timer resilient to page reloads/tab blur, question navigation palette with 5 states (not visited, answered, not answered, marked for review, answered & marked), direct question jumping, and clear response.
+  - Instant scoring with negative marking (-0.25 per wrong answer, floored at 0), category performance breakdown, and question review modal with filters.
+  - Real-time test analytics dashboard: total tests taken, average score %, highest score %, average accuracy %, and recent test history list.
+- **Coding Assessment Sprint Simulator (`src/hooks/useCodingAssessment.ts`, `src/pages/MockTests/MockTestsPage.tsx`)**:
+  - Timed DSA problem sprints on the 67 curated problems (15m, 30m, 45m).
+  - Problem statement, constraints, time/space target complexities, and 3-tier progressive hints.
+  - Optimal C++ reference solution toggle.
+  - Self-reflection evaluation form: assistance level (`independent`, `hints`, `solution`), actual minutes, and notes persisted to `problem_progress` and `study_sessions`.
+- **Interview Preparation Centre (`src/content/interviews/`, `src/pages/Interviews/InterviewsPage.tsx`, `src/hooks/useInterviewPrep.ts`)**:
+  - **Technical Interview (90 Questions)**: 10-12 questions each across 8 subjects (C++, OOP, DSA, DBMS, SQL, OS, CN, SE) with concise core answers for quick recall, deep technical explanations, code snippets, and follow-up interviewer questions.
+  - **HR & Behavioral Round (10 Questions)**: 10 core placement HR questions with recruiter objective, 3-part answering structure, realistic sample answer, mistakes to avoid, pro tips, and personal answer draft textarea persisted to IndexedDB `notes` (`Interview HR`).
+  - **Project Defense & Architecture Blueprint**: 5-step defense guide, 10 frequent project questions, and interactive editable project blueprint form preloaded with AK67 architecture and persisted to IndexedDB `notes` (`Interview Project`).
+- **Company Preparation Hub & Pipeline (`src/content/companies/initialCompanies.ts`, `src/pages/Companies/CompaniesPage.tsx`, `src/hooks/useCompanyProfiles.ts`)**:
+  - 10 pre-loaded company profiles: TCS, Infosys, Wipro, Accenture, Cognizant, Capgemini, Deloitte, LTIMindtree, Amazon, Microsoft.
+  - Pipeline status filters: All, Wishlist, Applied, OA Cleared, Interviewing, Offered, Rejected.
+  - Prominent guidance disclaimer on campus recruitment criteria.
+  - 4 preparation focus pillars: Aptitude focus, Coding/DSA focus, Technical interview focus, HR focus.
+  - Interactive round preparation checklists and editable personal referral notes persisted to IndexedDB `company_profiles`.
+  - Add custom target company modal.
+- **Dashboard Synchronization (`src/pages/Dashboard/DashboardPage.tsx`)**:
+  - Header navigation shortcuts for Mock Tests, Interviews, and Companies.
+  - Secondary metrics row: Mock assessment performance (attempt count, average score %, latest score %) and Campus hiring pipeline (total tracked, active drives).
+  - Roadmap modules updated: Module I, Module J, Module K activated with live data.
+- **Automated Verification Test Suite (`tests/mockTestAndInterview.test.ts`)**:
+  - 69 assertions verifying technical MCQs, scoring algorithms, negative marking, timer resilience, interview question banks, company profiles, and IndexedDB persistence.
+  - 100% pass rate across all 6 test suites (181 / 181 total assertions).
+  - Production build (`npm run build`) passing with zero errors and zero warnings.
 
 ---
 

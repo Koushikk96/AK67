@@ -172,10 +172,18 @@ export interface CompanyProfile {
   name: string;
   /** Target role (e.g., "SDE-1", "Digital Specialist Engineer") */
   role: string;
-  /** Eligibility rules (e.g., "60% throughout, no active backlogs") */
+  /** Eligibility rules (general guideline, not guaranteed) */
   eligibility: string;
   /** Assessment pattern breakdown */
   assessmentPattern: string;
+  /** Specific aptitude areas to focus on */
+  aptitudePrep?: string;
+  /** Specific coding topics to focus on */
+  codingPrep?: string;
+  /** Technical interview focus areas */
+  techInterviewTopics?: string;
+  /** HR and behavioral focus areas */
+  hrInterviewTopics?: string;
   /** Current application pipeline status */
   status: ApplicationStatus;
   /** Pipeline rounds */
@@ -211,7 +219,21 @@ export interface PersonalNote {
   updatedAt: string;
 }
 
-export type SessionType = 'dsa' | 'theory' | 'revision' | 'mock' | 'pomodoro';
+export type SessionType = 'dsa' | 'theory' | 'revision' | 'mock' | 'pomodoro' | 'coding_assessment';
+
+export type CodingAssistanceLevel = 'independent' | 'hints' | 'solution';
+
+export interface CodingAssessmentRecord {
+  id: string;
+  problemId: string;
+  problemTitle: string;
+  category: string;
+  difficulty: string;
+  durationMinutes: number;
+  assistanceLevel: CodingAssistanceLevel;
+  notes?: string;
+  attemptedAt: string;
+}
 
 export interface StudySession {
   /** UUID */

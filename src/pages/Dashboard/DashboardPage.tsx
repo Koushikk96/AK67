@@ -7,6 +7,8 @@ import { useDSAProblems } from '@/hooks/useDSAProblems';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
 import { dailyPlannerRepository } from '@/db/repositories/dailyPlannerRepository';
 import { topicRepository } from '@/db/repositories/topicRepository';
+import { mockTestRepository } from '@/db/repositories/mockTestRepository';
+import { companyRepository } from '@/db/repositories/companyRepository';
 import { DailyPlannerEntry } from '@/types/database';
 import { DSAProblemWithProgress } from '@/types/dsa';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
@@ -32,6 +34,9 @@ import {
   Square,
   Target,
   Clock,
+  Award,
+  Building2,
+  UserCheck,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -72,19 +77,59 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
     totalCompleted: 0,
   });
 
-  // Fetch streak, daily planner, revision queue, and subject progress
+  const [mockStats, setMockStats] = useState({
+    total: 0,
+    avgScore: 0,
+    latestScore: 0,
+  });
+
+  const [companyStats, setCompanyStats] = useState({
+    total: 0,
+    activePipeline: 0,
+  });
+
+  // Fetch streak, daily planner, revision queue, subject progress, mock tests, and companies
   const loadLiveData = async () => {
     try {
-      const [currentStreak, todayPlanner, allTopics, revQueue] = await Promise.all([
+      const [currentStreak, todayPlanner, allTopics, revQueue, allMockTests, allCompanies] = await Promise.all([
         studySessionRepository.calculateStreak(),
         dailyPlannerRepository.getToday(),
         topicRepository.getAll(),
         revisionService.getRevisionQueue(),
+        mockTestRepository.getAll(),
+        companyRepository.getAll(),
       ]);
 
       setStreak(currentStreak);
       setDailyPlanner(todayPlanner);
       setRevisionData(revQueue);
+
+      // Calculate mock test metrics
+      const totalMockCount = allMockTests.length;
+      let totalScorePercent = 0;
+      let latestScorePercent = 0;
+      if (totalMockCount > 0) {
+        totalScorePercent = Math.round(
+          allMockTests.reduce((acc, t) => acc + (t.totalQuestions > 0 ? (t.score / t.totalQuestions) * 100 : 0), 0) /
+            totalMockCount
+        );
+        const latest = allMockTests[0];
+        latestScorePercent = latest.totalQuestions > 0 ? Math.round((latest.score / latest.totalQuestions) * 100) : 0;
+      }
+      setMockStats({
+        total: totalMockCount,
+        avgScore: totalScorePercent,
+        latestScore: latestScorePercent,
+      });
+
+      // Calculate company pipeline metrics
+      const activePipelineCount = allCompanies.filter(
+        (c) => c.status === 'applied' || c.status === 'oa_cleared' || c.status === 'interviewing'
+      ).length;
+      setCompanyStats({
+        total: allCompanies.length,
+        activePipeline: activePipelineCount,
+      });
 
       let cpp = 0;
       let sql = 0;
@@ -231,6 +276,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               <Calendar className="mr-2 h-4 w-4 text-emerald-400" />
               Planner
             </Button>
+            <Button variant="outline" onClick={() => navigate('mock-tests')}>
+              <Award className="mr-2 h-4 w-4 text-amber-400" />
+              Mock Tests
+            </Button>
+            <Button variant="outline" onClick={() => navigate('interview')}>
+              <UserCheck className="mr-2 h-4 w-4 text-cyan-400" />
+              Interview
+            </Button>
+            <Button variant="outline" onClick={() => navigate('companies')}>
+              <Building2 className="mr-2 h-4 w-4 text-rose-400" />
+              Companies
+            </Button>
           </div>
         </div>
       </div>
@@ -352,6 +409,64 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <span>All scheduled reviews on track</span>
               )}
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Secondary Metrics: Mock Tests & Company Pipeline */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Mock Assessment Performance */}
+        <Card
+          className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
+          onClick={() => navigate('mock-tests')}
+        >
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Award className="h-4 w-4 text-amber-400" />
+                Assessment Simulation
+              </span>
+              <Badge variant="outline" className="text-[10px]">Module I</Badge>
+            </div>
+            <CardTitle className="text-xl font-bold text-white mt-1">
+              {mockStats.total} <span className="text-xs font-normal text-zinc-400">Mock Tests Attempted</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-2 mt-1">
+              <span>Avg Score: <strong className="text-blue-400">{mockStats.avgScore}%</strong></span>
+              <span>Latest Score: <strong className="text-emerald-400">{mockStats.latestScore}%</strong></span>
+              <span className="text-blue-400 hover:underline flex items-center gap-0.5">
+                Practice <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Company Preparation Pipeline */}
+        <Card
+          className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
+          onClick={() => navigate('companies')}
+        >
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Building2 className="h-4 w-4 text-rose-400" />
+                Campus Hiring Pipeline
+              </span>
+              <Badge variant="outline" className="text-[10px]">Module K</Badge>
+            </div>
+            <CardTitle className="text-xl font-bold text-white mt-1">
+              {companyStats.total} <span className="text-xs font-normal text-zinc-400">Target Companies</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center justify-between text-xs text-zinc-400 border-t border-zinc-800/80 pt-2 mt-1">
+              <span>Active in Pipeline: <strong className="text-amber-400">{companyStats.activePipeline} Drives</strong></span>
+              <span className="text-blue-400 hover:underline flex items-center gap-0.5">
+                View Tracker <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -1118,6 +1233,66 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               </CardTitle>
               <CardDescription>
                 Daily targets, custom tasks, study streak, and Pomodoro focus timer.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Module I: Mock Test Assessment Engine */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('mock-tests')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module I • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <Award className="h-4 w-4 text-amber-400" />
+                <span>Mock Test Assessment Engine</span>
+              </CardTitle>
+              <CardDescription>
+                Timed online assessments, coding sprints on the 67 DSA problems, and score analytics. ({mockStats.total} Attempts)
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Module J: Interview Preparation Hub */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('interview')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module J • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-cyan-400" />
+                <span>Interview Preparation Hub</span>
+              </CardTitle>
+              <CardDescription>
+                90+ technical interview questions, 10 core HR frameworks, and interactive project defense blueprint.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Module K: Company Preparation & Pipeline */}
+          <Card
+            className="cursor-pointer transition hover:border-zinc-700 hover:bg-zinc-900/50"
+            onClick={() => navigate('companies')}
+          >
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="solved">Module K • Active</Badge>
+                <ArrowRight className="h-4 w-4 text-zinc-400" />
+              </div>
+              <CardTitle className="mt-2 text-base flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-rose-400" />
+                <span>Company Preparation & Pipeline</span>
+              </CardTitle>
+              <CardDescription>
+                Company-specific test patterns, cutoffs, round checklists, and application status tracker. ({companyStats.total} Companies)
               </CardDescription>
             </CardHeader>
           </Card>
