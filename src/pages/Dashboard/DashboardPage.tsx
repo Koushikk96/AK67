@@ -269,7 +269,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                Phase 8 Active • Progressive Web App & Offline Placement System
+                Production Release • Placement Preparation System (v1.0.0)
               </span>
               <Badge variant="solved">IndexedDB Device Storage</Badge>
               {streak > 0 && (

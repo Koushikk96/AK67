@@ -959,7 +959,19 @@ export const MockTestsPage: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      {/* Sprint Live Countdown Timer */}
+                      <div
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border ${
+                          coding.remainingSeconds <= 300
+                            ? 'bg-rose-500/10 border-rose-500/40 text-rose-400 animate-pulse'
+                            : 'bg-zinc-950 border-zinc-800 text-amber-400'
+                        }`}
+                      >
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{formatTime(coding.remainingSeconds)}</span>
+                      </div>
+
                       <Button variant="outline" size="sm" onClick={() => coding.exitSprint()}>
                         Exit Sprint
                       </Button>

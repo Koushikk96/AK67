@@ -168,7 +168,7 @@ export const SettingsPage: React.FC = () => {
           <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">
             Storage & Safety
           </span>
-          <Badge variant="solved">Phase 2 Active</Badge>
+          <Badge variant="solved">Active & Verified</Badge>
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-white">Data Storage, Backup & Settings</h1>
         <p className="text-xs text-zinc-400 max-w-2xl">
@@ -312,8 +312,8 @@ export const SettingsPage: React.FC = () => {
               <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
                 <span className="text-[11px] text-zinc-400">Application Version</span>
                 <div className="mt-1 flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-white">v0.8.0</span>
-                  <Badge variant="solved" className="text-[10px]">Phase 8</Badge>
+                  <span className="font-mono text-sm font-bold text-white">v1.0.0</span>
+                  <Badge variant="solved" className="text-[10px]">Production</Badge>
                 </div>
               </div>
 

@@ -141,13 +141,62 @@ npm run preview
 
 ---
 
-## 🔒 Data Safety & Persistence
+## 🔒 Data Safety, Storage & Known Limitations
 
-- **Local-First**: All data is stored in browser-managed IndexedDB. It will not disappear on page refresh or browser restart.
-- **Backup Reminder**: AK67 monitors your study volume and prompts you to download a timestamped `.json` backup file.
-- **Restoration Validation**: Every uploaded backup undergoes schema verification, version checking, and presents a dry-run diff (showing items to add, modify, or merge) before committing to IndexedDB.
-- **Zero Cloud Leak**: None of your notes, code attempts, or mock test results are sent to an external server.
-- **Offline Backup & Restoration**: Exporting and restoring JSON backups works completely offline with zero network connectivity using browser Blob URLs and `FileReader`.
+### Where Data Is Stored
+All personal learning progress—including problem statuses, custom notes, bookmarks, revision intervals, daily planner tasks, mock test history, mistake entries, and study sessions—is stored strictly in your browser's local **IndexedDB** (`AK67_Database`).
+
+### ⚠️ Critical Data Limitations Every User Must Know
+> [!IMPORTANT]
+> - **No Cloud Synchronization**: AK67 has ₹0 server cost and zero backend. There is NO automatic background cloud synchronization across your phone and laptop.
+> - **Independent Device Progress**: Progress made on your laptop browser stays on your laptop; progress on your mobile phone stays on your mobile phone.
+> - **PWA Installation Does Not Sync**: Installing AK67 as a PWA to your home screen or desktop creates an installable app shell, but it still utilizes the local browser profile's storage on that device.
+> - **Browser Cache Clearing Warning**: Manually selecting "Clear Browsing Data" or "Clear Site Data and Cookies" in Chrome/Firefox/Edge will wipe your local IndexedDB storage.
+> - **Incognito / Private Windows**: Browsing in Incognito mode uses ephemeral storage that is destroyed as soon as the window is closed.
+
+### How to Export Backups
+1. Navigate to **Settings** (`#settings`) or click the **Backup Now** button in the top navigation banner.
+2. Under **Backup & Recovery Center**, click **"Export Complete Backup"**.
+3. A timestamped JSON file (`AK67_Backup_YYYY-MM-DD_HHmmss.json`) will download instantly to your device.
+
+### How to Restore Backups
+1. Go to **Settings** -> **Restore Backup**.
+2. Select your previously downloaded `.json` backup file.
+3. The built-in **Dry-Run Diff Engine** will parse the file, validate its schema and signatures, and display a comparative preview of new, conflicting, and identical records.
+4. Choose your restoration strategy:
+   - **Merge (Recommended)**: Preserves existing local progress and only adds new records or updates statuses where the backup has higher completion.
+   - **Replace**: Creates an in-memory safety snapshot, wipes local tables, and commits the backup snapshot cleanly (with automated rollback safety on error).
+
+---
+
+## ☁️ Cloudflare Pages Free Deployment Guide
+
+AK67 is designed for ₹0 permanent hosting using **Cloudflare Pages**:
+
+### Deployment Steps
+1. **Push to GitHub**:
+   ```bash
+   git init
+   git add .
+   git commit -m "feat: initial commit"
+   git remote add origin https://github.com/<your-username>/AK67.git
+   git branch -M main
+   git push -u origin main
+   ```
+2. **Connect Cloudflare Pages**:
+   - Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com/) and navigate to **Workers & Pages** -> **Create Application** -> **Pages** -> **Connect to Git**.
+   - Select your `AK67` repository.
+3. **Configure Build Settings**:
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Build Output Directory**: `dist`
+   - **Root Directory**: `/`
+   - **Environment Variables**: None required (Zero paid APIs, zero backend secrets).
+4. **Deploy**:
+   - Click **"Save and Deploy"**.
+   - Cloudflare Pages builds static assets into `dist/`.
+   - The included `public/_redirects` (`/* /index.html 200`) and `public/_routes.json` ensure single-page hash routing functions without 404s.
+   - Access the live application via your generated `*.pages.dev` URL or attach your free custom domain.
 
 ---
 

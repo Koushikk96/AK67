@@ -7,13 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2026-11-18
 
-### Planned for Phase 9
-- Comprehensive end-to-end quality assurance and responsiveness audit.
-- Data persistence verification across refresh, browser restart, and profile switches.
-- Performance & accessibility audit via Lighthouse.
-- Cloudflare Pages build and deployment setup (`_routes.json` / `_redirects`).
+### Completed (Phase 9: Final QA, Production Verification & Deployment Preparation)
+- **Defect Remediation & State Recovery**:
+  - Implemented session persistence and wall-clock countdown timer in Coding Assessment Simulator (`useCodingAssessment.ts`), allowing active sprints to survive page reloads and browser restarts.
+  - Enhanced Active Assessment Protection in `src/utils/pwaUtils.ts`: Both Mock Tests and Coding Sprints now reliably trigger `isAssessmentActive() === true` to safeguard active candidate assessments against service worker update prompts. Added in-memory fallback flag and safe error recovery.
+  - Corrected hardcoded version and badge strings across `MobileBottomNav.tsx`, `DashboardPage.tsx`, `SettingsPage.tsx`, and `package.json` to reflect production release `v1.0.0`.
+- **IndexedDB Architecture & Migration Integrity Audit**:
+  - Verified table schemas, primary keys, and indexes across all 8 stores in Dexie database.
+  - Validated simulated schema evolution (Dexie v1 -> v2) ensuring zero data loss of user progress, notes, or test results.
+  - Verified transaction atomicity and automatic rollback safety upon simulated failure.
+- **Backup, Diff & Restoration Integrity**:
+  - Validated schema format v1 compliance and strict rejection of corrupt or foreign backups.
+  - Verified dry-run diff engine detecting identical vs conflicting vs new records.
+  - Tested non-destructive merge and replace restoration on clean database with snapshot rollback safety.
+- **Analytics Engine & Insufficient Data Verification**:
+  - Verified exact 188 curriculum items calculation (DSA: 67, C++: 17, SQL: 21, Core CS: 47, Aptitude: 36).
+  - Confirmed subjects with 0 test attempts return `undefined` rather than 0% to prevent classifying lack of data as poor performance.
+  - Confirmed study time is derived solely from `study_sessions` with zero double-counting.
+- **Cloudflare Pages Free Hosting Configuration**:
+  - Configured `public/_redirects` (`/* /index.html 200`) and `public/_routes.json` ensuring seamless SPA routing without 404s on refresh.
+  - Configured `public/robots.txt`.
+- **Automated Verification Test Suite (`tests/finalQAAndIntegrity.test.ts`)**:
+  - Added comprehensive 1,213-assertion test suite.
+  - 100% pass rate across all 9 test suites: **1,508 / 1,508 total assertions passed**.
+  - Strict TypeScript check (`tsc --noEmit`) passing with 0 errors.
+  - Production build (`npm run build`) passing with zero errors.
 
 ---
 

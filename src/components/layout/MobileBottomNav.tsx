@@ -89,7 +89,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentRoute, 
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 <span>Zero Account • Local Storage Only</span>
               </div>
-              <span className="text-[10px] text-zinc-500 font-mono">v0.1.0</span>
+              <span className="text-[10px] text-zinc-500 font-mono">v1.0.0</span>
             </div>
           </div>
         </div>

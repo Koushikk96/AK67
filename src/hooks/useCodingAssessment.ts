@@ -1,24 +1,114 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { DSAProblem } from '@/types/dsa';
 import { CodingAssistanceLevel } from '@/types/database';
 import { dsaProblems } from '@/content/dsa';
 import { problemRepository } from '@/db/repositories/problemRepository';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
+import {
+  ACTIVE_CODING_STORAGE_KEY,
+  setAssessmentActiveInMemory,
+} from '@/utils/pwaUtils';
 
 export interface ActiveCodingSprint {
   problem: DSAProblem;
   durationMinutes: number;
   startTimestamp: number;
+  endTime: number;
   status: 'solving' | 'submitted';
+  revealedHints: number;
+  showSolution: boolean;
   assistanceLevel?: CodingAssistanceLevel;
   selfReportedMinutes?: number;
   userNotes?: string;
 }
 
+// Memory fallback for Node.js test environments
+let memorySprint: string | null = null;
+
+const getSavedSprint = (): ActiveCodingSprint | null => {
+  try {
+    const raw =
+      typeof localStorage !== 'undefined'
+        ? localStorage.getItem(ACTIVE_CODING_STORAGE_KEY)
+        : memorySprint;
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch {
+    // Ignore storage parsing errors
+  }
+  return null;
+};
+
+const saveSprint = (sprint: ActiveCodingSprint | null) => {
+  try {
+    if (sprint) {
+      const json = JSON.stringify(sprint);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(ACTIVE_CODING_STORAGE_KEY, json);
+      }
+      memorySprint = json;
+    } else {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(ACTIVE_CODING_STORAGE_KEY);
+      }
+      memorySprint = null;
+    }
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 export const useCodingAssessment = () => {
-  const [activeSprint, setActiveSprint] = useState<ActiveCodingSprint | null>(null);
-  const [revealedHints, setRevealedHints] = useState<number>(0);
-  const [showSolution, setShowSolution] = useState<boolean>(false);
+  const [activeSprint, setActiveSprint] = useState<ActiveCodingSprint | null>(() => {
+    const saved = getSavedSprint();
+    if (saved && saved.status === 'solving') {
+      return saved;
+    }
+    return null;
+  });
+
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(() => {
+    const saved = getSavedSprint();
+    if (saved && saved.status === 'solving' && saved.endTime) {
+      return Math.max(0, Math.floor((saved.endTime - Date.now()) / 1000));
+    }
+    return 0;
+  });
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sync in-memory assessment flag with active sprint status
+  useEffect(() => {
+    if (activeSprint && activeSprint.status === 'solving') {
+      setAssessmentActiveInMemory(true);
+    } else {
+      setAssessmentActiveInMemory(false);
+    }
+  }, [activeSprint]);
+
+  // Wall-clock resilient countdown timer
+  useEffect(() => {
+    if (!activeSprint || activeSprint.status !== 'solving') {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    const updateTimer = () => {
+      const remaining = Math.max(
+        0,
+        Math.floor((activeSprint.endTime - Date.now()) / 1000)
+      );
+      setRemainingSeconds(remaining);
+    };
+
+    updateTimer();
+    timerRef.current = setInterval(updateTimer, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [activeSprint]);
 
   // Start a timed coding sprint on a selected or random DSA problem
   const startSprint = useCallback((problemId?: string, durationMinutes: number = 30) => {
@@ -31,22 +121,45 @@ export const useCodingAssessment = () => {
       target = dsaProblems[randomIndex];
     }
 
-    setActiveSprint({
+    const now = Date.now();
+    const sprint: ActiveCodingSprint = {
       problem: target,
       durationMinutes,
-      startTimestamp: Date.now(),
+      startTimestamp: now,
+      endTime: now + durationMinutes * 60 * 1000,
       status: 'solving',
-    });
-    setRevealedHints(0);
-    setShowSolution(false);
+      revealedHints: 0,
+      showSolution: false,
+    };
+
+    saveSprint(sprint);
+    setActiveSprint(sprint);
+    setRemainingSeconds(durationMinutes * 60);
+    setAssessmentActiveInMemory(true);
   }, []);
 
   const revealNextHint = useCallback(() => {
-    setRevealedHints((prev) => Math.min(3, prev + 1));
+    setActiveSprint((prev) => {
+      if (!prev) return null;
+      const updated: ActiveCodingSprint = {
+        ...prev,
+        revealedHints: Math.min(3, prev.revealedHints + 1),
+      };
+      saveSprint(updated);
+      return updated;
+    });
   }, []);
 
   const toggleSolution = useCallback(() => {
-    setShowSolution((prev) => !prev);
+    setActiveSprint((prev) => {
+      if (!prev) return null;
+      const updated: ActiveCodingSprint = {
+        ...prev,
+        showSolution: !prev.showSolution,
+      };
+      saveSprint(updated);
+      return updated;
+    });
   }, []);
 
   // Submit coding attempt with self-reflection
@@ -80,32 +193,34 @@ export const useCodingAssessment = () => {
         today
       );
 
-      setActiveSprint((prev) =>
-        prev
-          ? {
-              ...prev,
-              status: 'submitted',
-              assistanceLevel,
-              selfReportedMinutes,
-              userNotes: notes,
-            }
-          : null
-      );
-      setShowSolution(true);
+      const submittedSprint: ActiveCodingSprint = {
+        ...activeSprint,
+        status: 'submitted',
+        showSolution: true,
+        assistanceLevel,
+        selfReportedMinutes,
+        userNotes: notes,
+      };
+
+      saveSprint(submittedSprint);
+      setActiveSprint(submittedSprint);
+      setAssessmentActiveInMemory(false);
     },
     [activeSprint]
   );
 
   const exitSprint = useCallback(() => {
+    saveSprint(null);
     setActiveSprint(null);
-    setRevealedHints(0);
-    setShowSolution(false);
+    setRemainingSeconds(0);
+    setAssessmentActiveInMemory(false);
   }, []);
 
   return {
     activeSprint,
-    revealedHints,
-    showSolution,
+    remainingSeconds,
+    revealedHints: activeSprint?.revealedHints || 0,
+    showSolution: activeSprint?.showSolution || false,
     allProblems: dsaProblems,
     startSprint,
     revealNextHint,
