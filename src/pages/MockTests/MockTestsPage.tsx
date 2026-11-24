@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMockTests } from '@/hooks/useMockTests';
 import { useCodingAssessment } from '@/hooks/useCodingAssessment';
+import { DSALanguage } from '@/types/dsa';
 import { MockTestCategory, MockDifficulty, MockTestConfig, QuestionResultItem } from '@/types/mockTest';
 import { CodingAssistanceLevel } from '@/types/database';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
@@ -68,6 +69,19 @@ export const MockTestsPage: React.FC = () => {
   // Coding sprint form state
   const [selectedCodingProblemId, setSelectedCodingProblemId] = useState<string>(dsaProblems[0]?.id || '');
   const [sprintMinutes, setSprintMinutes] = useState<number>(30);
+  const [sprintLanguage, setSprintLanguage] = useState<DSALanguage>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
+        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
+          return saved;
+        }
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    return 'cpp';
+  });
   const [codingAssistance, setCodingAssistance] = useState<CodingAssistanceLevel>('independent');
   const [codingActualMinutes, setCodingActualMinutes] = useState<number>(25);
   const [codingNotes, setCodingNotes] = useState<string>('');
@@ -876,15 +890,39 @@ export const MockTestsPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">Sprint Language:</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['cpp', 'python', 'java'] as const).map((lang) => {
+                        const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                        return (
+                          <button
+                            key={lang}
+                            type="button"
+                            onClick={() => setSprintLanguage(lang)}
+                            className={`py-2 text-xs font-semibold rounded-md border transition ${
+                              sprintLanguage === lang
+                                ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                                : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-zinc-200'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-zinc-300">Sprint Duration:</label>
                     <div className="grid grid-cols-3 gap-2">
                       {[15, 30, 45].map((m) => (
                         <button
                           key={m}
+                          type="button"
                           onClick={() => setSprintMinutes(m)}
                           className={`py-2 text-xs font-semibold rounded-md border transition ${
                             sprintMinutes === m
-                              ? 'bg-blue-600 text-white border-blue-500'
+                              ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
                               : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-zinc-200'
                           }`}
                         >
@@ -898,14 +936,14 @@ export const MockTestsPage: React.FC = () => {
                     <Button
                       variant="primary"
                       className="flex-1"
-                      onClick={() => coding.startSprint(selectedCodingProblemId, sprintMinutes)}
+                      onClick={() => coding.startSprint(selectedCodingProblemId, sprintMinutes, sprintLanguage)}
                     >
                       <Play className="h-3.5 w-3.5" />
                       Start Selected Sprint
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => coding.startSprint(undefined, sprintMinutes)}
+                      onClick={() => coding.startSprint(undefined, sprintMinutes, sprintLanguage)}
                       className="text-zinc-300"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -938,7 +976,7 @@ export const MockTestsPage: React.FC = () => {
               <Card className="bg-zinc-900/60 border-zinc-800">
                 <CardHeader className="pb-3 border-b border-zinc-800">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-bold text-blue-400">
                         Problem #{coding.activeSprint.problem.number}
                       </span>
@@ -957,6 +995,32 @@ export const MockTestsPage: React.FC = () => {
                       >
                         {coding.activeSprint.problem.difficulty}
                       </Badge>
+
+                      {/* Active Sprint Language Indicator & Switcher */}
+                      <div
+                        className="flex items-center rounded-md border border-zinc-800 bg-zinc-950 p-0.5"
+                        role="tablist"
+                        aria-label="Active Sprint Language"
+                      >
+                        {(['cpp', 'python', 'java'] as const).map((lang) => {
+                          const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                          const isCurrent = (coding.activeSprint?.selectedLanguage || 'cpp') === lang;
+                          return (
+                            <button
+                              key={lang}
+                              type="button"
+                              onClick={() => coding.setLanguage(lang)}
+                              className={`rounded px-2 py-0.5 text-[11px] font-semibold transition ${
+                                isCurrent
+                                  ? 'bg-blue-600 text-white shadow-sm'
+                                  : 'text-zinc-400 hover:text-zinc-200'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -1116,15 +1180,43 @@ export const MockTestsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Reference C++ Solution */}
+                  {/* Multi-Language Optimal Reference Solution */}
                   {coding.showSolution && (
                     <div className="space-y-2 pt-2 border-t border-zinc-800">
-                      <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                        <Code2 className="h-3.5 w-3.5" />
-                        <span>Optimal C++ Reference Solution:</span>
-                      </span>
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                          <Code2 className="h-3.5 w-3.5" />
+                          <span>
+                            Optimal {coding.activeSprint.selectedLanguage === 'python' ? 'Python' : coding.activeSprint.selectedLanguage === 'java' ? 'Java' : 'C++'} Reference Solution:
+                          </span>
+                        </span>
+                        <div className="flex items-center rounded-md border border-zinc-800 bg-zinc-950 p-0.5">
+                          {(['cpp', 'python', 'java'] as const).map((lang) => {
+                            const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                            const isCurrent = (coding.activeSprint?.selectedLanguage || 'cpp') === lang;
+                            return (
+                              <button
+                                key={lang}
+                                type="button"
+                                onClick={() => coding.setLanguage(lang)}
+                                className={`rounded px-2 py-0.5 text-[11px] font-medium transition ${
+                                  isCurrent
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-zinc-400 hover:text-zinc-200'
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <pre className="p-4 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-mono overflow-x-auto leading-relaxed">
-                        {coding.activeSprint.problem.cppSolution}
+                        {coding.activeSprint.selectedLanguage === 'python'
+                          ? coding.activeSprint.problem.pythonSolution
+                          : coding.activeSprint.selectedLanguage === 'java'
+                          ? coding.activeSprint.problem.javaSolution
+                          : coding.activeSprint.problem.cppSolution}
                       </pre>
                     </div>
                   )}
