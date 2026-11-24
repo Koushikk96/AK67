@@ -6,6 +6,7 @@ import {
   BarChart3,
   Code2,
   FileCode2,
+  Terminal,
   Database,
   Cpu,
   Brain,
@@ -36,6 +37,8 @@ export const NavIcon: React.FC<NavIconProps> = ({ name, ...props }) => {
       return <Code2 {...props} />;
     case 'FileCode2':
       return <FileCode2 {...props} />;
+    case 'Terminal':
+      return <Terminal {...props} />;
     case 'Database':
       return <Database {...props} />;
     case 'Cpu':

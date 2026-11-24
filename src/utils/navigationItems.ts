@@ -55,6 +55,15 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     description: 'Memory layout, pointers, OOP mechanics, STL and interview QA',
   },
   {
+    id: 'python',
+    label: 'Python Mastery',
+    shortLabel: 'Python',
+    section: 'practice',
+    iconName: 'Terminal',
+    badge: '89',
+    description: 'Complete Python mastery: fundamentals, OOP, algorithms, and interview prep',
+  },
+  {
     id: 'sql',
     label: 'SQL Arena',
     shortLabel: 'SQL',

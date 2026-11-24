@@ -78,6 +78,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
     totalCompleted: 0,
   });
 
+  const [pythonStats, setPythonStats] = useState({
+    completed: 0,
+    total: 89,
+  });
+
   const [aptitudeStats, setAptitudeStats] = useState({
     quant: 0,
     logical: 0,
@@ -165,6 +170,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       let os = 0;
       let cn = 0;
       let se = 0;
+      let python = 0;
 
       let quant = 0;
       let logical = 0;
@@ -174,6 +180,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         const isDone = t.status === 'completed' || t.isMastered;
         if (isDone) {
           if (t.category === 'cpp') cpp++;
+          else if (t.category === 'python') python++;
           else if (t.category === 'sql') sql++;
           else if (t.category === 'dbms') dbms++;
           else if (t.category === 'os') os++;
@@ -193,6 +200,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         cn,
         se,
         totalCompleted: cpp + sql + dbms + os + cn + se,
+      });
+
+      setPythonStats({
+        completed: python,
+        total: 89,
       });
 
       setAptitudeStats({
@@ -1002,6 +1014,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
                 <span>Pointers, OOP, STL, Memory</span>
                 <span>{Math.round((techStats.cpp / 17) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* Python Mastery */}
+            <div
+              onClick={() => navigate('python')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-emerald-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Terminal className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-300 transition-colors">
+                    Python Mastery
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {pythonStats.completed} / 89
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-500"
+                  style={{ width: `${Math.round((pythonStats.completed / 89) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>8 Modules • OOP • DSA</span>
+                <span>{Math.round((pythonStats.completed / 89) * 100)}%</span>
               </p>
             </div>
 

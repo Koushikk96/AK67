@@ -4,6 +4,7 @@ export type RouteId =
   | 'dashboard'
   | 'dsa'
   | 'cpp'
+  | 'python'
   | 'sql'
   | 'core-cs'
   | 'aptitude'

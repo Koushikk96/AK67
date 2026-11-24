@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-11-24
+
+### Added (Phase 11B: Python Mastery Track)
+- **Complete Python Mastery Curriculum (8 Modules, Exactly 89 Curated Topics)**:
+  - Module 1: Python Fundamentals (10 topics: `py-01` to `py-10`).
+  - Module 2: Data Structures & Built-in Collections (10 topics: `py-11` to `py-20`).
+  - Module 3: Functions, Functional Idioms & Scope (12 topics: `py-21` to `py-32`).
+  - Module 4: Object-Oriented Programming (11 topics: `py-33` to `py-43`).
+  - Module 5: Advanced Python Mechanics (15 topics: `py-44` to `py-58`).
+  - Module 6: Problem-Solving Patterns & Algorithms (12 topics: `py-59` to `py-70`).
+  - Module 7: Practical Python & Applied Development (9 topics: `py-71` to `py-79`).
+  - Module 8: Python Interview Preparation & Problem Patterns (10 topics: `py-80` to `py-89`).
+- **Comprehensive Educational Content Quality**:
+  - 178+ practical code examples with expected output and explanations.
+  - 267 practice exercises (89 Beginner, 89 Intermediate, 89 Advanced) with attempt-first concealed solutions.
+  - 178+ multiple-choice quiz questions with instantaneous feedback and explanations.
+  - 267+ key revision notes and spaced repetition integration.
+- **Interactive Learning Interface & Navigation**:
+  - `TopicDetailModal.tsx`: Tabbed modal for learning, attempt-first practice, interactive quizzes, and personal notes.
+  - `ModuleCard.tsx`: Module overview card with progress indicators.
+  - `PythonPage.tsx`: Dedicated learning page with search, module filtering, difficulty filtering, and real-time statistics.
+  - Integrated into navigation bar and dashboard curriculum section.
+- **Local-First IndexedDB Persistence**:
+  - Seamless persistence in Dexie `topic_progress` table (`category: 'python'`) with 0 schema migration or data resets.
+- **Automated Verification**:
+  - Added `tests/pythonCurriculum.test.ts` with 14 assertions.
+  - 100% pass rate across all 10 test suites (1,522 / 1,522 assertions passed).
+  - TypeScript validation and production build (`npm run build`) passing with zero errors.
+
+---
+
 ## [1.0.0] - 2026-11-18
 
 ### Completed (Phase 9: Final QA, Production Verification & Deployment Preparation)
