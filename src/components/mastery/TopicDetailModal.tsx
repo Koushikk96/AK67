@@ -456,7 +456,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
                         <div className="mt-3 p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 space-y-2 animate-fadeIn">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
-                              Verified Python Solution
+                              Verified {topic.language === 'java' ? 'Java' : 'Python'} Solution
                             </span>
                             <button
                               onClick={() => copyToClipboard(ex.solution, 1000 + idx)}

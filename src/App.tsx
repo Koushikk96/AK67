@@ -8,6 +8,7 @@ import { DashboardPage } from '@/pages/Dashboard/DashboardPage';
 import { DSAPage } from '@/pages/DSA/DSAPage';
 import { CPPPage } from '@/pages/CPP/CPPPage';
 import { PythonPage } from '@/pages/Python/PythonPage';
+import { JavaPage } from '@/pages/Java/JavaPage';
 import { SQLPage } from '@/pages/SQL/SQLPage';
 import { CoreCSPage } from '@/pages/CoreCS/CoreCSPage';
 import { AptitudePage } from '@/pages/Aptitude/AptitudePage';
@@ -34,6 +35,8 @@ const AppContent: React.FC = () => {
         return <CPPPage />;
       case 'python':
         return <PythonPage />;
+      case 'java':
+        return <JavaPage />;
       case 'sql':
         return <SQLPage />;
       case 'core-cs':

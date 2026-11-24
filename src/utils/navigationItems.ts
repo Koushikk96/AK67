@@ -64,6 +64,15 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     description: 'Complete Python mastery: fundamentals, OOP, algorithms, and interview prep',
   },
   {
+    id: 'java',
+    label: 'Java Mastery',
+    shortLabel: 'Java',
+    section: 'practice',
+    iconName: 'Coffee',
+    badge: '106',
+    description: 'Complete Java mastery: JVM, Collections, Concurrency, NIO, JDBC, and interview prep',
+  },
+  {
     id: 'sql',
     label: 'SQL Arena',
     shortLabel: 'SQL',

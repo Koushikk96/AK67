@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-11-24
+
+### Added (Phase 11C: Java Mastery Track)
+- **Complete Java Mastery Curriculum (8 Modules, Exactly 106 Curated Topics)**:
+  - Module 1: Java Fundamentals (11 topics: `java-01` to `java-11`).
+  - Module 2: Core Programming (11 topics: `java-12` to `java-22`).
+  - Module 3: Object-Oriented Programming (16 topics: `java-23` to `java-38`).
+  - Module 4: Java Collections Framework (15 topics: `java-39` to `java-53`).
+  - Module 5: Advanced Java (20 topics: `java-54` to `java-73`).
+  - Module 6: Java Problem Solving (13 topics: `java-74` to `java-86`).
+  - Module 7: Practical Java (9 topics: `java-87` to `java-95`).
+  - Module 8: Java Interview Preparation (11 topics: `java-96` to `java-106`).
+- **Comprehensive Educational Content Quality**:
+  - 212+ practical code examples with expected output and explanations.
+  - 318 practice exercises (106 Beginner, 106 Intermediate, 106 Advanced) with attempt-first concealed solutions.
+  - 212+ multiple-choice quiz questions with 4 options and explanations.
+  - 318+ checkpoints and revision notes.
+- **Interactive Learning Interface & Navigation**:
+  - `JavaPage.tsx`: Dedicated learning page with search, module filtering, difficulty filtering, and real-time statistics.
+  - `useJavaMastery.ts`: Custom hook managing topic progress, checkpoints, bookmarks, personal notes, and spaced repetition under category `'java'`.
+  - Integrated into navigation bar (badge: 106) and dashboard curriculum section.
+- **Local-First IndexedDB Persistence**:
+  - Seamless persistence in Dexie `topic_progress` table (`category: 'java'`) with zero schema migration or data resets.
+- **Automated Verification**:
+  - Added `tests/javaCurriculum.test.ts` with 13 comprehensive test suites.
+  - Added `tests/javaBackupRestore.test.ts` with 31 assertions.
+  - TypeScript validation (`tsc --noEmit`) and production build (`npm run build`) passing with zero errors.
+
+---
+
 ## [1.1.0] - 2026-11-24
 
 ### Added (Phase 11B: Python Mastery Track)

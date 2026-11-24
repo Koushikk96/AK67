@@ -52,6 +52,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2}'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
@@ -91,11 +92,21 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'dexie', 'dexie-react-hooks', 'lucide-react'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('dexie') || id.includes('lucide-react')) {
+              return 'vendor';
+            }
+          }
+          if (id.includes('content/java') || id.includes('content\\java')) {
+            return 'java-curriculum';
+          }
+          if (id.includes('content/python') || id.includes('content\\python')) {
+            return 'python-curriculum';
+          }
         },
       },
     },

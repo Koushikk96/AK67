@@ -5,6 +5,7 @@ export type RouteId =
   | 'dsa'
   | 'cpp'
   | 'python'
+  | 'java'
   | 'sql'
   | 'core-cs'
   | 'aptitude'

@@ -28,6 +28,7 @@ import {
   BookOpen,
   Database,
   Terminal,
+  Coffee,
   Cpu,
   Server,
   Network,
@@ -81,6 +82,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
   const [pythonStats, setPythonStats] = useState({
     completed: 0,
     total: 89,
+  });
+
+  const [javaStats, setJavaStats] = useState({
+    completed: 0,
+    total: 106,
   });
 
   const [aptitudeStats, setAptitudeStats] = useState({
@@ -171,6 +177,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       let cn = 0;
       let se = 0;
       let python = 0;
+      let java = 0;
 
       let quant = 0;
       let logical = 0;
@@ -181,6 +188,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         if (isDone) {
           if (t.category === 'cpp') cpp++;
           else if (t.category === 'python') python++;
+          else if (t.category === 'java') java++;
           else if (t.category === 'sql') sql++;
           else if (t.category === 'dbms') dbms++;
           else if (t.category === 'os') os++;
@@ -205,6 +213,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       setPythonStats({
         completed: python,
         total: 89,
+      });
+
+      setJavaStats({
+        completed: java,
+        total: 106,
       });
 
       setAptitudeStats({
@@ -1042,6 +1055,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
               <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
                 <span>8 Modules • OOP • DSA</span>
                 <span>{Math.round((pythonStats.completed / 89) * 100)}%</span>
+              </p>
+            </div>
+
+            {/* Java Mastery */}
+            <div
+              onClick={() => navigate('java')}
+              className="group cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900/40 p-3.5 transition hover:border-amber-500/40 hover:bg-zinc-900/70"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Coffee className="h-4 w-4 text-amber-400" />
+                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-amber-300 transition-colors">
+                    Java Mastery
+                  </span>
+                </div>
+                <span className="font-mono text-xs font-bold text-zinc-300">
+                  {javaStats.completed} / 106
+                </span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full bg-amber-500 transition-all duration-500"
+                  style={{ width: `${Math.round((javaStats.completed / 106) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[10px] text-zinc-500 flex justify-between">
+                <span>8 Modules • JVM • Collections</span>
+                <span>{Math.round((javaStats.completed / 106) * 100)}%</span>
               </p>
             </div>
 
