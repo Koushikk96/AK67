@@ -7,8 +7,6 @@ import { AppShell } from '@/components/layout/AppShell';
 import { DashboardPage } from '@/pages/Dashboard/DashboardPage';
 import { DSAPage } from '@/pages/DSA/DSAPage';
 import { CPPPage } from '@/pages/CPP/CPPPage';
-import { PythonPage } from '@/pages/Python/PythonPage';
-import { JavaPage } from '@/pages/Java/JavaPage';
 import { SQLPage } from '@/pages/SQL/SQLPage';
 import { CoreCSPage } from '@/pages/CoreCS/CoreCSPage';
 import { AptitudePage } from '@/pages/Aptitude/AptitudePage';
@@ -21,6 +19,10 @@ import { AnalyticsPage } from '@/pages/Analytics/AnalyticsPage';
 import { NotesPage } from '@/pages/Notes/NotesPage';
 import { MistakesPage } from '@/pages/Mistakes/MistakesPage';
 import { SettingsPage } from '@/pages/Settings/SettingsPage';
+
+// Lazy-loaded comprehensive mastery curriculum tracks for optimal initial load & PWA caching
+const PythonPage = React.lazy(() => import('@/pages/Python/PythonPage').then((m) => ({ default: m.PythonPage })));
+const JavaPage = React.lazy(() => import('@/pages/Java/JavaPage').then((m) => ({ default: m.JavaPage })));
 
 const AppContent: React.FC = () => {
   const { currentRoute, navigate } = useRouter();
@@ -68,7 +70,18 @@ const AppContent: React.FC = () => {
 
   return (
     <AppShell currentRoute={currentRoute} navigate={navigate}>
-      {renderCurrentPage()}
+      <React.Suspense
+        fallback={
+          <div className="flex items-center justify-center min-h-[50vh] text-zinc-400">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm font-medium">Loading learning track...</span>
+            </div>
+          </div>
+        }
+      >
+        {renderCurrentPage()}
+      </React.Suspense>
     </AppShell>
   );
 };

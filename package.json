@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "tsx tests/databasePersistence.test.ts && tsx tests/dsaCurriculum.test.ts && tsx tests/technicalCurriculum.test.ts && tsx tests/aptitudeCurriculum.test.ts && tsx tests/revisionPlanner.test.ts && tsx tests/mockTestAndInterview.test.ts && tsx tests/analyticsAndNotes.test.ts && tsx tests/pwaAndOffline.test.ts && tsx tests/finalQAAndIntegrity.test.ts && tsx tests/pythonCurriculum.test.ts && tsx tests/pythonBackupRestore.test.ts && tsx tests/pythonPersistenceUI.test.ts && tsx tests/javaCurriculum.test.ts && tsx tests/javaBackupRestore.test.ts",
+    "test": "tsx tests/databasePersistence.test.ts && tsx tests/dsaCurriculum.test.ts && tsx tests/technicalCurriculum.test.ts && tsx tests/aptitudeCurriculum.test.ts && tsx tests/revisionPlanner.test.ts && tsx tests/mockTestAndInterview.test.ts && tsx tests/analyticsAndNotes.test.ts && tsx tests/pwaAndOffline.test.ts && tsx tests/finalQAAndIntegrity.test.ts && tsx tests/pythonCurriculum.test.ts && tsx tests/pythonBackupRestore.test.ts && tsx tests/pythonPersistenceUI.test.ts && tsx tests/javaCurriculum.test.ts && tsx tests/javaBackupRestore.test.ts && tsx tests/javaPersistenceUI.test.ts",
     "test:db": "tsx tests/databasePersistence.test.ts",
     "test:dsa": "tsx tests/dsaCurriculum.test.ts",
     "test:tech": "tsx tests/technicalCurriculum.test.ts",
@@ -18,7 +18,7 @@
     "test:pwa": "tsx tests/pwaAndOffline.test.ts",
     "test:final": "tsx tests/finalQAAndIntegrity.test.ts",
     "test:python": "tsx tests/pythonCurriculum.test.ts",
-    "test:java": "tsx tests/javaCurriculum.test.ts && tsx tests/javaBackupRestore.test.ts"
+    "test:java": "tsx tests/javaCurriculum.test.ts && tsx tests/javaBackupRestore.test.ts && tsx tests/javaPersistenceUI.test.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
