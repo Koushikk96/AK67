@@ -90,6 +90,9 @@ export const AptitudeTopicModal: React.FC<AptitudeTopicModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aptitude-topic-title"
         className="relative flex flex-col w-full max-w-4xl max-h-[92vh] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

@@ -92,7 +92,7 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -102,7 +102,15 @@ export default defineConfig({
             }
           }
           if (id.includes('content/java') || id.includes('content\\java')) {
-            return 'java-curriculum';
+            if (
+              id.includes('module1') ||
+              id.includes('module2') ||
+              id.includes('module3') ||
+              id.includes('module4')
+            ) {
+              return 'java-foundations';
+            }
+            return 'java-enterprise';
           }
           if (id.includes('content/python') || id.includes('content\\python')) {
             return 'python-curriculum';

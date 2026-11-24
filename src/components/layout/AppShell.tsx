@@ -7,6 +7,7 @@ import { BackupReminderBanner } from '@/components/backup/BackupReminderBanner';
 import { NetworkStatusBanner } from '@/components/pwa/NetworkStatusBanner';
 import { PWAInstallBanner } from '@/components/pwa/PWAInstallBanner';
 import { PWAUpdateToast } from '@/components/pwa/PWAUpdateToast';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 interface AppShellProps {
   currentRoute: RouteId;
@@ -28,7 +29,9 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, navigate, chil
           <NetworkStatusBanner />
           <PWAInstallBanner />
           <BackupReminderBanner />
-          {children}
+          <ErrorBoundary onReset={() => navigate('dashboard')}>
+            {children}
+          </ErrorBoundary>
         </main>
 
         {/* Floating PWA Update Notification */}

@@ -8,6 +8,8 @@ export const useRouter = () => {
       'dashboard',
       'dsa',
       'cpp',
+      'python',
+      'java',
       'sql',
       'core-cs',
       'aptitude',
@@ -18,6 +20,7 @@ export const useRouter = () => {
       'companies',
       'analytics',
       'notes',
+      'mistakes',
       'settings',
     ];
     if (validRoutes.includes(hash as RouteId)) {

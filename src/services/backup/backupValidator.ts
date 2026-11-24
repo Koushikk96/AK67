@@ -70,19 +70,31 @@ export const backupValidator = {
       }
     }
 
-    // 4. Validate record identifiers
-    if (Array.isArray(data.problem_progress)) {
-      for (const p of data.problem_progress) {
-        if (!p || typeof p !== 'object' || typeof (p as any).id !== 'string') {
-          return { isValid: false, error: 'Found invalid problem progress record missing an id.' };
+    // 4. Validate record identifiers across all database tables
+    const idKeyedTables: (keyof BackupData)[] = [
+      'problem_progress',
+      'topic_progress',
+      'daily_planner',
+      'mock_tests',
+      'company_profiles',
+      'notes',
+      'study_sessions',
+    ];
+
+    for (const table of idKeyedTables) {
+      if (Array.isArray(data[table])) {
+        for (const item of data[table] as unknown[]) {
+          if (!item || typeof item !== 'object' || typeof (item as any).id !== 'string' || !(item as any).id.trim()) {
+            return { isValid: false, error: `Found invalid ${table} record missing a valid string 'id'.` };
+          }
         }
       }
     }
 
-    if (Array.isArray(data.notes)) {
-      for (const n of data.notes) {
-        if (!n || typeof n !== 'object' || typeof (n as any).id !== 'string') {
-          return { isValid: false, error: 'Found invalid personal note missing an id.' };
+    if (Array.isArray(data.app_settings)) {
+      for (const item of data.app_settings as unknown[]) {
+        if (!item || typeof item !== 'object' || typeof (item as any).key !== 'string' || !(item as any).key.trim()) {
+          return { isValid: false, error: "Found invalid app_settings record missing a valid string 'key'." };
         }
       }
     }

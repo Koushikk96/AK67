@@ -88,6 +88,9 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="technical-topic-title"
         className="relative flex flex-col max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-800 bg-[#121215] shadow-2xl text-zinc-100"
         onClick={(e) => e.stopPropagation()}
       >

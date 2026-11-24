@@ -109,7 +109,12 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
       />
 
       {/* Modal Dialog Container */}
-      <div className="relative z-10 w-full max-w-4xl max-h-[92vh] flex flex-col rounded-xl border border-zinc-750 bg-[#121215] text-zinc-100 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="problem-modal-title"
+        className="relative z-10 w-full max-w-4xl max-h-[92vh] flex flex-col rounded-xl border border-zinc-750 bg-[#121215] text-zinc-100 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      >
         {/* Sticky Header */}
         <div className="flex items-center justify-between border-b border-zinc-850 bg-[#0d0d10] px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2.5 overflow-hidden">
@@ -117,7 +122,7 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
               #{problem.number}
             </span>
             <div className="overflow-hidden">
-              <h2 className="truncate text-base font-bold text-white sm:text-lg">
+              <h2 id="problem-modal-title" className="truncate text-base font-bold text-white sm:text-lg">
                 {problem.title}
               </h2>
               <div className="flex items-center gap-2 text-xs text-zinc-400">
@@ -156,15 +161,15 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
         {/* Scrollable Body Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Status Bar & Quick Actions */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-            <div className="flex flex-wrap items-center gap-2 max-w-full">
-              <span className="text-xs text-zinc-400">Your Status:</span>
-              <div className="flex flex-wrap rounded-md border border-zinc-800 p-0.5 bg-zinc-900/80 max-w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs text-zinc-400 font-medium">Your Status:</span>
+              <div className="grid grid-cols-2 sm:flex rounded-md border border-zinc-800 p-0.5 bg-zinc-900/80 gap-0.5">
                 {(['not_started', 'attempted', 'solved', 'revise'] as ProblemStatus[]).map((st) => (
                   <button
                     key={st}
                     onClick={() => onUpdateStatus(problem.id, st)}
-                    className={`rounded px-2 sm:px-2.5 py-1 text-xs font-medium transition ${
+                    className={`rounded px-2.5 py-1 text-xs font-medium text-center transition ${
                       currentStatus === st
                         ? st === 'solved'
                           ? 'bg-emerald-500/20 text-emerald-400 font-semibold'

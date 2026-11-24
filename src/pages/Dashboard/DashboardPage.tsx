@@ -365,7 +365,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       </div>
 
       {/* Primary Key Metrics Grid - 5 Pillars */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {/* Metric 0: Overall Curriculum Readiness */}
         <Card
           className="cursor-pointer transition hover:border-emerald-500/40 bg-zinc-900/60"
@@ -409,9 +409,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <Code2 className="h-4 w-4 text-blue-400" />
               </div>
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-white flex items-baseline justify-between">
-              <span>{dsaLoading ? '...' : `${dsaStats.solved} / 67`}</span>
-              <span className="text-[10px] font-normal text-zinc-500">201 solutions (C++, Py, Java)</span>
+            <CardTitle className="text-2xl font-bold text-white">
+              {dsaLoading ? '...' : `${dsaStats.solved} / 67`}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -421,9 +420,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 style={{ width: `${dsaStats.completionPercentage}%` }}
               />
             </div>
-            <p className="flex justify-between text-[11px] text-zinc-400">
+            <p className="flex items-center justify-between text-[11px] text-zinc-400">
               <span>{dsaStats.completionPercentage}% solved</span>
-              <span>{dsaStats.attempted} attempted</span>
+              <span className="text-[10px] text-zinc-500">201 solutions</span>
             </p>
           </CardContent>
         </Card>
@@ -520,7 +519,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       </div>
 
       {/* Secondary Metrics: Mock Tests, Study Rhythm & Diagnostic Weak Areas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Mock Assessment Performance */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"

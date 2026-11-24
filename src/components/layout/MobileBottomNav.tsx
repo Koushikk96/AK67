@@ -36,7 +36,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ currentRoute, 
           />
 
           {/* Drawer Sheet */}
-          <div className="fixed inset-x-0 bottom-16 z-50 max-h-[80vh] overflow-y-auto rounded-t-2xl border-t border-zinc-800 bg-[#121215] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="All AK67 Modules"
+            className="fixed inset-x-0 bottom-16 z-50 max-h-[80vh] overflow-y-auto rounded-t-2xl border-t border-zinc-800 bg-[#121215] p-5 shadow-2xl animate-in slide-in-from-bottom duration-200"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
               <div>
                 <h3 className="font-semibold text-zinc-100 text-sm">All AK67 Modules</h3>

@@ -110,7 +110,12 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mastery-topic-title"
+        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+      >
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
           <div className="flex items-center gap-3">
@@ -124,7 +129,7 @@ export const TopicDetailModal: React.FC<TopicDetailModalProps> = ({
                 </span>
                 {getDifficultyBadge(topic.level)}
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
+              <h2 id="mastery-topic-title" className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
                 {topic.title}
               </h2>
             </div>

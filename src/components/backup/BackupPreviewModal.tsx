@@ -49,7 +49,12 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-zinc-750 bg-[#121215] p-5 sm:p-6 shadow-2xl text-zinc-100 animate-in fade-in zoom-in-95 duration-150">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="backup-preview-title"
+        className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-zinc-750 bg-[#121215] p-5 sm:p-6 shadow-2xl text-zinc-100 animate-in fade-in zoom-in-95 duration-150"
+      >
         {/* Header */}
         <div className="flex items-start justify-between border-b border-zinc-800 pb-4">
           <div>
@@ -57,7 +62,7 @@ export const BackupPreviewModal: React.FC<BackupPreviewModalProps> = ({
               <Badge variant="solved">Verified Backup</Badge>
               <span className="text-xs text-zinc-400">Schema v{diff.backupFile.schemaVersion}</span>
             </div>
-            <h2 className="text-lg font-bold text-white mt-1">Review & Restore Backup</h2>
+            <h2 id="backup-preview-title" className="text-lg font-bold text-white mt-1">Review & Restore Backup</h2>
             <p className="text-xs text-zinc-400 flex items-center gap-2 mt-0.5">
               <Calendar className="h-3 w-3 text-zinc-400" />
               <span>Exported on: {formattedDate}</span>
