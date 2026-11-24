@@ -1521,7 +1521,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <span>67 DSA Placement Sheet</span>
               </CardTitle>
               <CardDescription>
-                Arrays, Strings, Two Pointers, Trees, Graphs, DP and verified C++ solutions.
+                Arrays, Strings, Two Pointers, Trees, Graphs, DP and complete C++, Python, and Java solution implementations.
               </CardDescription>
             </CardHeader>
           </Card>

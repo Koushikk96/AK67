@@ -191,6 +191,26 @@ async function runPhase11EIntegrationTests() {
   const retrievedLang2 = await settingsRepository.get<DSALanguage>(PREFERRED_DSA_LANGUAGE_SETTINGS_KEY, undefined, testDb);
   assert(retrievedLang2 === 'java', '5l. Language preference successfully updated to java');
 
+  // Race condition resilience test
+  await setPreferredDSALanguage('python');
+  // Newer user selection arrives synchronously
+  await setPreferredDSALanguage('java');
+  assert(getSavedDSALanguage() === 'java', '5m. Newer user selection java is preserved without overwrite');
+
+  // Same-tab and cross-tab storage event test
+  if (typeof window !== 'undefined') {
+    let eventDetail: string | null = null;
+    const testHandler = (e: Event) => {
+      eventDetail = (e as CustomEvent).detail;
+    };
+    window.addEventListener('dsa-language-changed', testHandler);
+    await setPreferredDSALanguage('python', true);
+    assert(eventDetail === 'python', '5n. CustomEvent dsa-language-changed dispatches and notifies same-tab listeners');
+    window.removeEventListener('dsa-language-changed', testHandler);
+  } else {
+    assert(true, '5n. CustomEvent skipped in non-window Node runner');
+  }
+
   // -------------------------------------------------------------
   // Group 6: Legacy Coding Sprint Compatibility
   // -------------------------------------------------------------

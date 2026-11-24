@@ -3,22 +3,17 @@ import { AK67BackupFile, BackupData, RestorationResult } from '@/types/backup';
 import { settingsRepository } from '@/db/repositories/settingsRepository';
 import { ProblemProgress, TopicProgress, DailyPlannerEntry, CompanyProfile } from '@/types/database';
 import {
-  PREFERRED_DSA_LANGUAGE_STORAGE_KEY,
   PREFERRED_DSA_LANGUAGE_SETTINGS_KEY,
   isValidDSALanguage,
   DEFAULT_DSA_LANGUAGE,
+  setPreferredDSALanguage,
 } from '@/utils/dsaLanguage';
 
 async function syncRestoredDSALanguage(database: AK67Database) {
   try {
     const setting = await database.app_settings.get(PREFERRED_DSA_LANGUAGE_SETTINGS_KEY);
     const restoredLang = setting && isValidDSALanguage(setting.value) ? setting.value : DEFAULT_DSA_LANGUAGE;
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(PREFERRED_DSA_LANGUAGE_STORAGE_KEY, restoredLang);
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('dsa-language-changed', { detail: restoredLang }));
-      }
-    }
+    await setPreferredDSALanguage(restoredLang, true);
   } catch {}
 }
 

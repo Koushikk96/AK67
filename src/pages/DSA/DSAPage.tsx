@@ -113,7 +113,7 @@ export const DSAPage: React.FC = () => {
               67 DSA Placement Sheet
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl">
-              Master the exact 67 problems asked repeatedly in technical rounds. Each problem features progressive hints, complexity targets, verified C++, Python, and Java solutions (201 solutions total), and spaced revision scheduling.
+              Master the exact 67 problems asked repeatedly in technical rounds. Each problem features progressive hints, complexity targets, complete C++, Python, and Java solution implementations (201 language-specific solutions total), and spaced revision scheduling.
             </p>
             <div className="flex items-center gap-2 pt-1.5 flex-wrap">
               <span className="text-xs text-zinc-400 font-medium">Preferred Language:</span>
