@@ -40,6 +40,30 @@ public:
         return prev1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def climbStairs(self, n: int) -> int:
+        if n <= 2:
+            return n
+        prev2, prev1 = 1, 2
+        for _ in range(3, n + 1):
+            prev2, prev1 = prev1, prev1 + prev2
+        return prev1`,
+    javaSolution: `class Solution {
+    public int climbStairs(int n) {
+        if (n <= 2) return n;
+
+        int prev2 = 1;
+        int prev1 = 2;
+
+        for (int i = 3; i <= n; i++) {
+            int current = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = current;
+        }
+
+        return prev1;
+    }
+}`,
     edgeCases: ['n = 1 (returns 1)', 'n = 2 (returns 2)', 'Maximum constraint n = 45 (fits in 32-bit int)'],
     commonMistakes: ['Using unmemoized naive recursion which runs in exponential O(2^n) time'],
     interviewExplanation:
@@ -88,6 +112,30 @@ public:
         return prev1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def rob(self, nums: list[int]) -> int:
+        if not nums:
+            return 0
+        prev2, prev1 = 0, 0
+        for num in nums:
+            prev2, prev1 = prev1, max(prev1, prev2 + num)
+        return prev1`,
+    javaSolution: `class Solution {
+    public int rob(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+
+        int prev2 = 0;
+        int prev1 = 0;
+
+        for (int num : nums) {
+            int current = Math.max(prev1, prev2 + num);
+            prev2 = prev1;
+            prev1 = current;
+        }
+
+        return prev1;
+    }
+}`,
     edgeCases: ['Single house', 'Two houses', 'All houses have 0 money'],
     commonMistakes: ['Thinking a simple alternating parity sum (even indices vs odd indices) works; e.g. [2, 1, 1, 2] yields 4 by skipping two middle houses'],
     interviewExplanation:
@@ -133,6 +181,27 @@ public:
         return prev1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def minCostClimbingStairs(self, cost: list[int]) -> int:
+        prev2, prev1 = 0, 0
+        for i in range(2, len(cost) + 1):
+            current = min(prev1 + cost[i - 1], prev2 + cost[i - 2])
+            prev2, prev1 = prev1, current
+        return prev1`,
+    javaSolution: `class Solution {
+    public int minCostClimbingStairs(int[] cost) {
+        int prev2 = 0;
+        int prev1 = 0;
+
+        for (int i = 2; i <= cost.length; i++) {
+            int current = Math.min(prev1 + cost[i - 1], prev2 + cost[i - 2]);
+            prev2 = prev1;
+            prev1 = current;
+        }
+
+        return prev1;
+    }
+}`,
     edgeCases: ['Array of length 2 (return min(cost[0], cost[1]))', 'All zero costs', 'Alternating small and large costs'],
     commonMistakes: ['Assuming the top floor is at index n - 1 instead of index n'],
     interviewExplanation:
@@ -181,6 +250,36 @@ public:
         return dp[amount] > amount ? -1 : dp[amount];
     }
 };`,
+    pythonSolution: `class Solution:
+    def coinChange(self, coins: list[int], amount: int) -> int:
+        dp = [amount + 1] * (amount + 1)
+        dp[0] = 0
+
+        for i in range(1, amount + 1):
+            for c in coins:
+                if i >= c:
+                    dp[i] = min(dp[i], dp[i - c] + 1)
+
+        return -1 if dp[amount] > amount else dp[amount]`,
+    javaSolution: `import java.util.Arrays;
+
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1);
+        dp[0] = 0;
+
+        for (int i = 1; i <= amount; i++) {
+            for (int c : coins) {
+                if (i >= c) {
+                    dp[i] = Math.min(dp[i], dp[i - c] + 1);
+                }
+            }
+        }
+
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}`,
     edgeCases: ['amount = 0 (returns 0)', 'Impossible amount (e.g. amount=3 with coin=2, returns -1)', 'Coin value greater than amount'],
     commonMistakes: [
       'Using a greedy approach (taking largest coin first fails for non-canonical coin systems)',
@@ -235,6 +334,42 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def maxProduct(self, nums: list[int]) -> int:
+        max_prod = nums[0]
+        min_prod = nums[0]
+        result = nums[0]
+
+        for num in nums[1:]:
+            if num < 0:
+                max_prod, min_prod = min_prod, max_prod
+
+            max_prod = max(num, max_prod * num)
+            min_prod = min(num, min_prod * num)
+            result = max(result, max_prod)
+
+        return result`,
+    javaSolution: `class Solution {
+    public int maxProduct(int[] nums) {
+        int maxProd = nums[0];
+        int minProd = nums[0];
+        int result = nums[0];
+
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] < 0) {
+                int temp = maxProd;
+                maxProd = minProd;
+                minProd = temp;
+            }
+
+            maxProd = Math.max(nums[i], maxProd * nums[i]);
+            minProd = Math.min(nums[i], minProd * nums[i]);
+            result = Math.max(result, maxProd);
+        }
+
+        return result;
+    }
+}`,
     edgeCases: ['Array containing zeroes (resets product to current element)', 'All negative numbers with odd length', 'Single element array'],
     commonMistakes: ['Only tracking maxProd; forgetting that minProd * negative can produce the new global maximum'],
     interviewExplanation:

@@ -45,6 +45,36 @@ public:
         return -1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def search(self, nums: list[int], target: int) -> int:
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return -1`,
+    javaSolution: `class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+}`,
     edgeCases: ['Single element array (found or not found)', 'Target smaller than smallest or greater than largest', 'Two element array'],
     commonMistakes: ['Computing mid as (left + right) / 2 which risks 32-bit signed integer overflow when left + right > INT_MAX'],
     interviewExplanation:
@@ -95,6 +125,36 @@ public:
         return left;
     }
 };`,
+    pythonSolution: `class Solution:
+    def searchInsert(self, nums: list[int], target: int) -> int:
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return left`,
+    javaSolution: `class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+}`,
     edgeCases: ['Target smaller than all elements (insert at 0)', 'Target greater than all elements (insert at n)', 'Target exists in array'],
     commonMistakes: ['Returning -1 or right instead of left when target is absent'],
     interviewExplanation:
@@ -156,6 +216,54 @@ private:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def searchRange(self, nums: list[int], target: int) -> list[int]:
+        def find_bound(is_first: bool) -> int:
+            left, right = 0, len(nums) - 1
+            bound = -1
+            while left <= right:
+                mid = left + (right - left) // 2
+                if nums[mid] == target:
+                    bound = mid
+                    if is_first:
+                        right = mid - 1
+                    else:
+                        left = mid + 1
+                elif nums[mid] < target:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+            return bound
+
+        return [find_bound(True), find_bound(False)]`,
+    javaSolution: `class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        return new int[] { findBound(nums, target, true), findBound(nums, target, false) };
+    }
+
+    private int findBound(int[] nums, int target, boolean isFirst) {
+        int left = 0;
+        int right = nums.length - 1;
+        int result = -1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                result = mid;
+                if (isFirst) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    }
+}`,
     edgeCases: ['Empty array', 'Target not present in array', 'All elements equal to target (e.g. [8, 8, 8, 8])'],
     commonMistakes: ['Finding one occurrence and expanding linearly left and right, which degrades to O(n) worst case'],
     interviewExplanation:
@@ -215,6 +323,53 @@ public:
         return -1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def search(self, nums: list[int], target: int) -> int:
+        left, right = 0, len(nums) - 1
+
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+
+            if nums[left] <= nums[mid]:
+                if nums[left] <= target < nums[mid]:
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            else:
+                if nums[mid] < target <= nums[right]:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+
+        return -1`,
+    javaSolution: `class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) return mid;
+
+            if (nums[left] <= nums[mid]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+}`,
     edgeCases: ['Array not rotated (standard sorted)', 'Single element array', 'Target is at the rotation pivot'],
     commonMistakes: ['Trying to find pivot index first with extra passes instead of doing it in a single modified binary search pass'],
     interviewExplanation:
@@ -263,6 +418,34 @@ public:
         return nums[left];
     }
 };`,
+    pythonSolution: `class Solution:
+    def findMin(self, nums: list[int]) -> int:
+        left, right = 0, len(nums) - 1
+
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] > nums[right]:
+                left = mid + 1
+            else:
+                right = mid
+
+        return nums[left]`,
+    javaSolution: `class Solution {
+    public int findMin(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return nums[left];
+    }
+}`,
     edgeCases: ['Array not rotated at all (e.g. [1, 2, 3])', 'Array of size 1', 'Array rotated by n - 1 times'],
     commonMistakes: ['Setting right = mid - 1 when nums[mid] < nums[right], which might skip mid when mid itself is the minimum'],
     interviewExplanation:
@@ -321,6 +504,49 @@ public:
         return ans;
     }
 };`,
+    pythonSolution: `class Solution:
+    def minEatingSpeed(self, piles: list[int], h: int) -> int:
+        left, right = 1, max(piles)
+        ans = right
+
+        while left <= right:
+            mid = left + (right - left) // 2
+            hours_needed = sum((p + mid - 1) // mid for p in piles)
+
+            if hours_needed <= h:
+                ans = mid
+                right = mid - 1
+            else:
+                left = mid + 1
+
+        return ans`,
+    javaSolution: `class Solution {
+    public int minEatingSpeed(int[] piles, int h) {
+        int left = 1;
+        int right = 0;
+        for (int p : piles) {
+            if (p > right) right = p;
+        }
+        int ans = right;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            long hoursNeeded = 0;
+
+            for (int p : piles) {
+                hoursNeeded += (p + mid - 1L) / mid;
+            }
+
+            if (hoursNeeded <= h) {
+                ans = mid;
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+}`,
     edgeCases: ['h == piles.length (speed must equal max(piles))', 'piles contains values near 10^9 (use long long for hoursNeeded)', 'Single pile'],
     commonMistakes: ['32-bit overflow when summing hoursNeeded (long long is required as hoursNeeded can exceed 2^31 - 1)'],
     interviewExplanation:
@@ -376,6 +602,43 @@ public:
         return merged;
     }
 };`,
+    pythonSolution: `class Solution:
+    def merge(self, intervals: list[list[int]]) -> list[list[int]]:
+        if not intervals:
+            return []
+
+        intervals.sort(key=lambda x: x[0])
+        merged = [intervals[0]]
+
+        for current in intervals[1:]:
+            last = merged[-1]
+            if current[0] <= last[1]:
+                last[1] = max(last[1], current[1])
+            else:
+                merged.append(current)
+
+        return merged`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        if (intervals == null || intervals.length == 0) return new int[0][0];
+
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+        List<int[]> merged = new ArrayList<>();
+        merged.add(intervals[0]);
+
+        for (int i = 1; i < intervals.length; i++) {
+            int[] last = merged.get(merged.size() - 1);
+            if (intervals[i][0] <= last[1]) {
+                last[1] = Math.max(last[1], intervals[i][1]);
+            } else {
+                merged.add(intervals[i]);
+            }
+        }
+        return merged.toArray(new int[merged.size()][]);
+    }
+}`,
     edgeCases: ['All intervals overlap into one', 'No intervals overlap', 'Adjacent touching intervals [1,4] and [4,5] (considered overlapping)'],
     commonMistakes: ['Forgetting std::max when updating last[1], which fails for contained intervals like [1, 10] and [2, 5]'],
     interviewExplanation:

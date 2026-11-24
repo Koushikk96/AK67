@@ -5,6 +5,7 @@
 
 export const ACTIVE_MOCK_STORAGE_KEY = 'ak67_active_test_session';
 export const ACTIVE_CODING_STORAGE_KEY = 'ak67_active_coding_sprint';
+export const LEGACY_CODING_STORAGE_KEY = 'AK67_ACTIVE_CODING_ASSESSMENT';
 
 let inMemoryAssessmentActive = false;
 
@@ -33,7 +34,9 @@ export const isAssessmentActive = (): boolean => {
     }
 
     // 2. Check Coding Sprint Session
-    const rawCoding = localStorage.getItem(ACTIVE_CODING_STORAGE_KEY);
+    const rawCoding =
+      localStorage.getItem(ACTIVE_CODING_STORAGE_KEY) ||
+      localStorage.getItem(LEGACY_CODING_STORAGE_KEY);
     if (rawCoding) {
       const parsed = JSON.parse(rawCoding);
       if (parsed && parsed.status === 'solving' && parsed.endTime && Date.now() < parsed.endTime) {

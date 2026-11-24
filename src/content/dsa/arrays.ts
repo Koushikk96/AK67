@@ -57,6 +57,31 @@ public:
         return {};
     }
 };`,
+    pythonSolution: `class Solution:
+    def twoSum(self, nums: list[int], target: int) -> list[int]:
+        num_to_index: dict[int, int] = {}
+        for i, num in enumerate(nums):
+            complement = target - num
+            if complement in num_to_index:
+                return [num_to_index[complement], i]
+            num_to_index[num] = i
+        return []`,
+    javaSolution: `import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> numToIndex = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (numToIndex.containsKey(complement)) {
+                return new int[] { numToIndex.get(complement), i };
+            }
+            numToIndex.put(nums[i], i);
+        }
+        return new int[0];
+    }
+}`,
     edgeCases: [
       'Negative numbers in the array or target',
       'Duplicate elements adding up to target (e.g. [3, 3], target=6)',
@@ -115,6 +140,30 @@ public:
         return maxProfit;
     }
 };`,
+    pythonSolution: `class Solution:
+    def maxProfit(self, prices: list[int]) -> int:
+        min_price = float('inf')
+        max_profit = 0
+        for price in prices:
+            if price < min_price:
+                min_price = price
+            elif price - min_price > max_profit:
+                max_profit = price - min_price
+        return max_profit`,
+    javaSolution: `class Solution {
+    public int maxProfit(int[] prices) {
+        int minPrice = Integer.MAX_VALUE;
+        int maxProfit = 0;
+        for (int price : prices) {
+            if (price < minPrice) {
+                minPrice = price;
+            } else if (price - minPrice > maxProfit) {
+                maxProfit = price - minPrice;
+            }
+        }
+        return maxProfit;
+    }
+}`,
     edgeCases: [
       'Monotonically decreasing prices (should return 0)',
       'Array of length 1 (cannot sell, return 0)',
@@ -166,6 +215,28 @@ public:
         return false;
     }
 };`,
+    pythonSolution: `class Solution:
+    def containsDuplicate(self, nums: list[int]) -> bool:
+        seen: set[int] = set()
+        for num in nums:
+            if num in seen:
+                return True
+            seen.add(num)
+        return False`,
+    javaSolution: `import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+    public boolean containsDuplicate(int[] nums) {
+        Set<Integer> seen = new HashSet<>();
+        for (int num : nums) {
+            if (!seen.add(num)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}`,
     edgeCases: ['Array with only 1 element (always false)', 'All elements identical', 'Large numbers with negative signs'],
     commonMistakes: ['Comparing sizes of set and vector after inserting all elements instead of early-exiting'],
     interviewExplanation:
@@ -216,6 +287,36 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def productExceptSelf(self, nums: list[int]) -> list[int]:
+        n = len(nums)
+        result = [1] * n
+        prefix = 1
+        for i in range(n):
+            result[i] = prefix
+            prefix *= nums[i]
+        suffix = 1
+        for i in range(n - 1, -1, -1):
+            result[i] *= suffix
+            suffix *= nums[i]
+        return result`,
+    javaSolution: `class Solution {
+    public int[] productExceptSelf(int[] nums) {
+        int n = nums.length;
+        int[] result = new int[n];
+        int prefix = 1;
+        for (int i = 0; i < n; i++) {
+            result[i] = prefix;
+            prefix *= nums[i];
+        }
+        int suffix = 1;
+        for (int i = n - 1; i >= 0; i--) {
+            result[i] *= suffix;
+            suffix *= nums[i];
+        }
+        return result;
+    }
+}`,
     edgeCases: ['Array containing one zero', 'Array containing two or more zeroes (all products become 0)', 'Negative numbers'],
     commonMistakes: ['Attempting total product divided by nums[i] (explicitly forbidden and fails with zero)'],
     interviewExplanation:
@@ -263,6 +364,25 @@ public:
         return maxSum;
     }
 };`,
+    pythonSolution: `class Solution:
+    def maxSubArray(self, nums: list[int]) -> int:
+        current_sum = nums[0]
+        max_sum = nums[0]
+        for num in nums[1:]:
+            current_sum = max(num, current_sum + num)
+            max_sum = max(max_sum, current_sum)
+        return max_sum`,
+    javaSolution: `class Solution {
+    public int maxSubArray(int[] nums) {
+        int currentSum = nums[0];
+        int maxSum = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            currentSum = Math.max(nums[i], currentSum + nums[i]);
+            maxSum = Math.max(maxSum, currentSum);
+        }
+        return maxSum;
+    }
+}`,
     edgeCases: ['All negative numbers (e.g. [-5, -2, -8], should return -2)', 'Single element array', 'Alternating large positive and negative numbers'],
     commonMistakes: ['Resetting running sum to 0 instead of nums[i], which fails when all numbers are negative'],
     interviewExplanation:
@@ -306,6 +426,28 @@ public:
         return candidate;
     }
 };`,
+    pythonSolution: `class Solution:
+    def majorityElement(self, nums: list[int]) -> int:
+        candidate = nums[0]
+        count = 0
+        for num in nums:
+            if count == 0:
+                candidate = num
+            count += 1 if num == candidate else -1
+        return candidate`,
+    javaSolution: `class Solution {
+    public int majorityElement(int[] nums) {
+        int candidate = nums[0];
+        int count = 0;
+        for (int num : nums) {
+            if (count == 0) {
+                candidate = num;
+            }
+            count += (num == candidate) ? 1 : -1;
+        }
+        return candidate;
+    }
+}`,
     edgeCases: ['Single element array', 'Array with only two distinct elements', 'Candidate alternating in the beginning'],
     commonMistakes: ['Thinking sorting O(n log n) is optimal when Boyer-Moore provides linear time with O(1) memory'],
     interviewExplanation:
@@ -350,6 +492,29 @@ public:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def moveZeroes(self, nums: list[int]) -> None:
+        insert_pos = 0
+        for i in range(len(nums)):
+            if nums[i] != 0:
+                if i != insert_pos:
+                    nums[insert_pos], nums[i] = nums[i], nums[insert_pos]
+                insert_pos += 1`,
+    javaSolution: `class Solution {
+    public void moveZeroes(int[] nums) {
+        int insertPos = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] != 0) {
+                if (i != insertPos) {
+                    int temp = nums[insertPos];
+                    nums[insertPos] = nums[i];
+                    nums[i] = temp;
+                }
+                insertPos++;
+            }
+        }
+    }
+}`,
     edgeCases: ['No zeroes in array', 'All zeroes in array', 'Zeroes already at the end'],
     commonMistakes: ['Overwriting non-zeros instead of swapping or filling remaining positions with 0'],
     interviewExplanation:
@@ -402,6 +567,43 @@ public:
         std::reverse(nums.begin() + k, nums.end());
     }
 };`,
+    pythonSolution: `class Solution:
+    def rotate(self, nums: list[int], k: int) -> None:
+        n = len(nums)
+        k %= n
+        if k == 0:
+            return
+
+        def reverse(start: int, end: int) -> None:
+            while start < end:
+                nums[start], nums[end] = nums[end], nums[start]
+                start += 1
+                end -= 1
+
+        reverse(0, n - 1)
+        reverse(0, k - 1)
+        reverse(k, n - 1)`,
+    javaSolution: `class Solution {
+    public void rotate(int[] nums, int k) {
+        int n = nums.length;
+        k %= n;
+        if (k == 0) return;
+
+        reverse(nums, 0, n - 1);
+        reverse(nums, 0, k - 1);
+        reverse(nums, k, n - 1);
+    }
+
+    private void reverse(int[] nums, int start, int end) {
+        while (start < end) {
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start++;
+            end--;
+        }
+    }
+}`,
     edgeCases: ['k >= nums.length (must modulo k)', 'k == 0', 'Array of size 1'],
     commonMistakes: ['Forgetting k = k % n causing out-of-bounds index errors when k > n'],
     interviewExplanation:
@@ -443,6 +645,23 @@ public:
         return xorSum;
     }
 };`,
+    pythonSolution: `class Solution:
+    def missingNumber(self, nums: list[int]) -> int:
+        n = len(nums)
+        xor_sum = n
+        for i, num in enumerate(nums):
+            xor_sum ^= i ^ num
+        return xor_sum`,
+    javaSolution: `class Solution {
+    public int missingNumber(int[] nums) {
+        int n = nums.length;
+        int xorSum = n;
+        for (int i = 0; i < n; i++) {
+            xorSum ^= i ^ nums[i];
+        }
+        return xorSum;
+    }
+}`,
     edgeCases: ['Missing number is 0', 'Missing number is n', 'n = 1'],
     commonMistakes: ['Integer overflow when using summation for very large n (XOR variant is completely immune to overflow)'],
     interviewExplanation:
@@ -495,6 +714,31 @@ public:
         return -1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def pivotIndex(self, nums: list[int]) -> int:
+        total_sum = sum(nums)
+        left_sum = 0
+        for i, num in enumerate(nums):
+            if left_sum == total_sum - left_sum - num:
+                return i
+            left_sum += num
+        return -1`,
+    javaSolution: `class Solution {
+    public int pivotIndex(int[] nums) {
+        int totalSum = 0;
+        for (int num : nums) {
+            totalSum += num;
+        }
+        int leftSum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (leftSum == totalSum - leftSum - nums[i]) {
+                return i;
+            }
+            leftSum += nums[i];
+        }
+        return -1;
+    }
+}`,
     edgeCases: ['Pivot at index 0 (left sum = 0)', 'Pivot at last index (right sum = 0)', 'Negative elements resulting in zero sum'],
     commonMistakes: ['Recomputing right sum from scratch at each index, turning O(n) into O(n^2)'],
     interviewExplanation:
@@ -547,6 +791,38 @@ public:
         return count;
     }
 };`,
+    pythonSolution: `class Solution:
+    def subarraySum(self, nums: list[int], k: int) -> int:
+        prefix_freq: dict[int, int] = {0: 1}
+        current_sum = 0
+        count = 0
+        for num in nums:
+            current_sum += num
+            target_prefix = current_sum - k
+            if target_prefix in prefix_freq:
+                count += prefix_freq[target_prefix]
+            prefix_freq[current_sum] = prefix_freq.get(current_sum, 0) + 1
+        return count`,
+    javaSolution: `import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int subarraySum(int[] nums, int k) {
+        Map<Integer, Integer> prefixFreq = new HashMap<>();
+        prefixFreq.put(0, 1);
+        int currentSum = 0;
+        int count = 0;
+
+        for (int num : nums) {
+            currentSum += num;
+            int targetPrefix = currentSum - k;
+            count += prefixFreq.getOrDefault(targetPrefix, 0);
+            prefixFreq.put(currentSum, prefixFreq.getOrDefault(currentSum, 0) + 1);
+        }
+
+        return count;
+    }
+}`,
     edgeCases: ['Array with negative numbers and zeroes', 'k = 0', 'Multiple contiguous subsets canceling to 0'],
     commonMistakes: [
       'Trying sliding window with two pointers (which only works for strictly non-negative numbers)',
@@ -615,6 +891,54 @@ public:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def setZeroes(self, matrix: list[list[int]]) -> None:
+        m = len(matrix)
+        n = len(matrix[0])
+        first_col_zero = False
+
+        for i in range(m):
+            if matrix[i][0] == 0:
+                first_col_zero = True
+            for j in range(1, n):
+                if matrix[i][j] == 0:
+                    matrix[i][0] = 0
+                    matrix[0][j] = 0
+
+        for i in range(m - 1, -1, -1):
+            for j in range(n - 1, 0, -1):
+                if matrix[i][0] == 0 or matrix[0][j] == 0:
+                    matrix[i][j] = 0
+            if first_col_zero:
+                matrix[i][0] = 0`,
+    javaSolution: `class Solution {
+    public void setZeroes(int[][] matrix) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+        boolean firstColZero = false;
+
+        for (int i = 0; i < m; i++) {
+            if (matrix[i][0] == 0) firstColZero = true;
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 1; j--) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+            if (firstColZero) {
+                matrix[i][0] = 0;
+            }
+        }
+    }
+}`,
     edgeCases: ['1x1 matrix', 'First row or first column contains zero initially', 'Matrix with no zeroes'],
     commonMistakes: ['Overwriting row 0 and col 0 too early before reading their values for inner cells'],
     interviewExplanation:

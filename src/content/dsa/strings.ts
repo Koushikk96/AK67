@@ -41,6 +41,32 @@ public:
         return true;
     }
 };`,
+    pythonSolution: `class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        count: dict[str, int] = {}
+        for ch in s:
+            count[ch] = count.get(ch, 0) + 1
+        for ch in t:
+            if ch not in count or count[ch] == 0:
+                return False
+            count[ch] -= 1
+        return True`,
+    javaSolution: `class Solution {
+    public boolean isAnagram(String s, String t) {
+        if (s.length() != t.length()) return false;
+        int[] freq = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            freq[s.charAt(i) - 'a']++;
+            freq[t.charAt(i) - 'a']--;
+        }
+        for (int count : freq) {
+            if (count != 0) return false;
+        }
+        return true;
+    }
+}`,
     edgeCases: ['Strings of unequal lengths', 'Single letter identical strings', 'Repeated identical characters'],
     commonMistakes: ['Sorting strings takes O(n log n); an integer frequency array takes O(n) and O(1) space'],
     interviewExplanation:
@@ -99,6 +125,38 @@ public:
         return true;
     }
 };`,
+    pythonSolution: `class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        left, right = 0, len(s) - 1
+        while left < right:
+            while left < right and not s[left].isalnum():
+                left += 1
+            while left < right and not s[right].isalnum():
+                right -= 1
+            if s[left].lower() != s[right].lower():
+                return False
+            left += 1
+            right -= 1
+        return True`,
+    javaSolution: `class Solution {
+    public boolean isPalindrome(String s) {
+        int left = 0, right = s.length() - 1;
+        while (left < right) {
+            while (left < right && !Character.isLetterOrDigit(s.charAt(left))) {
+                left++;
+            }
+            while (left < right && !Character.isLetterOrDigit(s.charAt(right))) {
+                right--;
+            }
+            if (Character.toLowerCase(s.charAt(left)) != Character.toLowerCase(s.charAt(right))) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+}`,
     edgeCases: ['String with no alphanumeric characters (e.g. "., ")', 'Single alphanumeric character', 'Mixed case palindromes'],
     commonMistakes: ['Allocating a new string for sanitized characters, wasting O(n) space instead of two pointers'],
     interviewExplanation:
@@ -145,6 +203,30 @@ public:
         return strs[0];
     }
 };`,
+    pythonSolution: `class Solution:
+    def longestCommonPrefix(self, strs: list[str]) -> str:
+        if not strs:
+            return ""
+        prefix = strs[0]
+        for s in strs[1:]:
+            while not s.startswith(prefix):
+                prefix = prefix[:-1]
+                if not prefix:
+                    return ""
+        return prefix`,
+    javaSolution: `class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        String prefix = strs[0];
+        for (int i = 1; i < strs.length; i++) {
+            while (!strs[i].startsWith(prefix)) {
+                prefix = prefix.substring(0, prefix.length() - 1);
+                if (prefix.isEmpty()) return "";
+            }
+        }
+        return prefix;
+    }
+}`,
     edgeCases: ['Single string in array (prefix is the entire string)', 'Array contains an empty string ""', 'No characters match'],
     commonMistakes: ['Comparing horizontal pairs instead of vertical scanning, which does unnecessary work when common prefix is very short'],
     interviewExplanation:
@@ -196,6 +278,20 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def reverseWords(self, s: str) -> str:
+        return " ".join(reversed(s.split()))`,
+    javaSolution: `class Solution {
+    public String reverseWords(String s) {
+        String[] parts = s.trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = parts.length - 1; i >= 0; i--) {
+            sb.append(parts[i]);
+            if (i > 0) sb.append(" ");
+        }
+        return sb.toString();
+    }
+}`,
     edgeCases: ['All spaces string', 'Single word with leading/trailing spaces', 'Multiple spaces between words'],
     commonMistakes: ['Leaving a trailing space at the very end of the output string'],
     interviewExplanation:
@@ -241,6 +337,29 @@ public:
         return -1;
     }
 };`,
+    pythonSolution: `class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        freq: dict[str, int] = {}
+        for ch in s:
+            freq[ch] = freq.get(ch, 0) + 1
+        for i, ch in enumerate(s):
+            if freq[ch] == 1:
+                return i
+        return -1`,
+    javaSolution: `class Solution {
+    public int firstUniqChar(String s) {
+        int[] freq = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            freq[s.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (freq[s.charAt(i) - 'a'] == 1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}`,
     edgeCases: ['All characters repeat (return -1)', 'Single character string (return 0)', 'Unique character is at the very end'],
     commonMistakes: ['Using an unordered_map which has hashing overhead when fixed array of 26 is much faster'],
     interviewExplanation:
@@ -292,6 +411,36 @@ public:
         return maxLen;
     }
 };`,
+    pythonSolution: `class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        char_index: dict[str, int] = {}
+        left = 0
+        max_len = 0
+        for right, ch in enumerate(s):
+            if ch in char_index and char_index[ch] >= left:
+                left = char_index[ch] + 1
+            char_index[ch] = right
+            max_len = max(max_len, right - left + 1)
+        return max_len`,
+    javaSolution: `import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character, Integer> charIndex = new HashMap<>();
+        int left = 0;
+        int maxLen = 0;
+        for (int right = 0; right < s.length(); right++) {
+            char ch = s.charAt(right);
+            if (charIndex.containsKey(ch) && charIndex.get(ch) >= left) {
+                left = charIndex.get(ch) + 1;
+            }
+            charIndex.put(ch, right);
+            maxLen = Math.max(maxLen, right - left + 1);
+        }
+        return maxLen;
+    }
+}`,
     edgeCases: ['Empty string (returns 0)', 'String with all identical characters (returns 1)', 'String with all distinct characters'],
     commonMistakes: [
       'Shrinking the window character-by-character with a while loop instead of jumping left directly to lastIndex[c] + 1',
@@ -349,6 +498,29 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def groupAnagrams(self, strs: list[str]) -> list[list[str]]:
+        groups: dict[str, list[str]] = {}
+        for s in strs:
+            key = "".join(sorted(s))
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(s)
+        return list(groups.values())`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> groups = new HashMap<>();
+        for (String s : strs) {
+            char[] chars = s.toCharArray();
+            Arrays.sort(chars);
+            String key = new String(chars);
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
+        }
+        return new ArrayList<>(groups.values());
+    }
+}`,
     edgeCases: ['Array containing empty strings ""', 'Single character strings', 'All strings are anagrams of one another'],
     commonMistakes: ['Using frequency count signature when simple sorting is much shorter, cleaner, and within constraints for k <= 100'],
     interviewExplanation:
@@ -414,6 +586,59 @@ public:
         return result * sign;
     }
 };`,
+    pythonSolution: `class Solution:
+    def myAtoi(self, s: str) -> int:
+        s = s.strip()
+        if not s:
+            return 0
+        sign = 1
+        i = 0
+        if s[0] == '-':
+            sign = -1
+            i = 1
+        elif s[0] == '+':
+            i = 1
+        res = 0
+        INT_MAX = 2**31 - 1
+        INT_MIN = -2**31
+        while i < len(s) and s[i].isdigit():
+            digit = int(s[i])
+            res = res * 10 + digit
+            if sign == 1 and res > INT_MAX:
+                return INT_MAX
+            if sign == -1 and -res < INT_MIN:
+                return INT_MIN
+            i += 1
+        return sign * res`,
+    javaSolution: `class Solution {
+    public int myAtoi(String s) {
+        if (s == null) return 0;
+        s = s.trim();
+        if (s.isEmpty()) return 0;
+
+        int sign = 1;
+        int i = 0;
+        if (s.charAt(0) == '-') {
+            sign = -1;
+            i = 1;
+        } else if (s.charAt(0) == '+') {
+            i = 1;
+        }
+
+        long res = 0;
+        while (i < s.length() && Character.isDigit(s.charAt(i))) {
+            res = res * 10 + (s.charAt(i) - '0');
+            if (sign == 1 && res > Integer.MAX_VALUE) {
+                return Integer.MAX_VALUE;
+            }
+            if (sign == -1 && -res < Integer.MIN_VALUE) {
+                return Integer.MIN_VALUE;
+            }
+            i++;
+        }
+        return (int) (sign * res);
+    }
+}`,
     edgeCases: ['Leading characters other than digits or sign', 'Empty string or only spaces', 'Numbers exceeding 2^31 - 1 or less than -2^31'],
     commonMistakes: ['Relying on long long which still overflows on 100-digit input; proactive overflow checking is mandatory'],
     interviewExplanation:

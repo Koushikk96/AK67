@@ -50,6 +50,48 @@ public:
         return prev;
     }
 };`,
+    pythonSolution: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+from typing import Optional
+
+class Solution:
+    def reverseList(self, head: Optional['ListNode']) -> Optional['ListNode']:
+        prev = None
+        curr = head
+        while curr:
+            next_temp = curr.next
+            curr.next = prev
+            prev = curr
+            curr = next_temp
+        return prev`,
+    javaSolution: `/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+
+        while (curr != null) {
+            ListNode nextTemp = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = nextTemp;
+        }
+
+        return prev;
+    }
+}`,
     edgeCases: ['Empty list (head == nullptr)', 'Single-node list', 'Two-node list'],
     commonMistakes: ['Losing the reference to curr->next before reversing the pointer'],
     interviewExplanation:
@@ -99,6 +141,29 @@ public:
         return slow;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def middleNode(self, head: Optional['ListNode']) -> Optional['ListNode']:
+        slow = head
+        fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow`,
+    javaSolution: `class Solution {
+    public ListNode middleNode(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        return slow;
+    }
+}`,
     edgeCases: ['Single-node list (returns head)', 'Even number of nodes (returns second middle)', 'Odd number of nodes'],
     commonMistakes: ['Checking fast->next->next before checking fast->next != nullptr causing null pointer dereference'],
     interviewExplanation:
@@ -150,6 +215,44 @@ public:
         return dummy.next;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def mergeTwoLists(self, list1: Optional['ListNode'], list2: Optional['ListNode']) -> Optional['ListNode']:
+        dummy = ListNode(0)
+        tail = dummy
+
+        while list1 and list2:
+            if list1.val <= list2.val:
+                tail.next = list1
+                list1 = list1.next
+            else:
+                tail.next = list2
+                list2 = list2.next
+            tail = tail.next
+
+        tail.next = list1 if list1 else list2
+        return dummy.next`,
+    javaSolution: `class Solution {
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode(0);
+        ListNode tail = dummy;
+
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                tail.next = list1;
+                list1 = list1.next;
+            } else {
+                tail.next = list2;
+                list2 = list2.next;
+            }
+            tail = tail.next;
+        }
+
+        tail.next = (list1 != null) ? list1 : list2;
+        return dummy.next;
+    }
+}`,
     edgeCases: ['One list is empty', 'Both lists are empty', 'Lists of completely different lengths or disjoint values'],
     commonMistakes: ['Iterating through the remainder of the non-empty list node-by-node instead of attaching it in one O(1) pointer assignment'],
     interviewExplanation:
@@ -202,6 +305,41 @@ public:
         return false;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def hasCycle(self, head: Optional['ListNode']) -> bool:
+        if not head or not head.next:
+            return False
+
+        slow = head
+        fast = head
+
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow == fast:
+                return True
+
+        return False`,
+    javaSolution: `class Solution {
+    public boolean hasCycle(ListNode head) {
+        if (head == null || head.next == null) return false;
+
+        ListNode slow = head;
+        ListNode fast = head;
+
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}`,
     edgeCases: ['Empty list', 'Single node pointing to nullptr', 'Single node pointing to itself'],
     commonMistakes: ['Comparing slow->val == fast->val instead of comparing pointer memory addresses slow == fast'],
     interviewExplanation:
@@ -258,6 +396,42 @@ public:
         return dummy.next;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def removeNthFromEnd(self, head: Optional['ListNode'], n: int) -> Optional['ListNode']:
+        dummy = ListNode(0, head)
+        fast = dummy
+        slow = dummy
+
+        for _ in range(n + 1):
+            fast = fast.next
+
+        while fast:
+            fast = fast.next
+            slow = slow.next
+
+        slow.next = slow.next.next
+        return dummy.next`,
+    javaSolution: `class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode dummy = new ListNode(0, head);
+        ListNode fast = dummy;
+        ListNode slow = dummy;
+
+        for (int i = 0; i <= n; i++) {
+            fast = fast.next;
+        }
+
+        while (fast != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+
+        slow.next = slow.next.next;
+        return dummy.next;
+    }
+}`,
     edgeCases: ['Removing the head of the list (handled gracefully by dummy node)', 'List of length 1', 'Removing the tail node (n = 1)'],
     commonMistakes: ['Failing to free deleted node in C++, causing memory leaks in interview discussions'],
     interviewExplanation:

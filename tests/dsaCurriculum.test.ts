@@ -77,6 +77,8 @@ function runCurriculumTests() {
       !p.spaceComplexity ||
       !Array.isArray(p.hints) || p.hints.length !== 3 ||
       !p.cppSolution ||
+      !p.pythonSolution ||
+      !p.javaSolution ||
       !Array.isArray(p.edgeCases) || p.edgeCases.length === 0 ||
       !Array.isArray(p.commonMistakes) || p.commonMistakes.length === 0 ||
       !p.interviewExplanation
@@ -104,6 +106,16 @@ function runCurriculumTests() {
     }
   }
   assert(allCppValid, '6. All 67 C++ solutions have balanced braces and structured syntax');
+
+  // 7. Multi-language Python and Java solutions validation
+  let allMultiLanguageValid = true;
+  for (const p of dsaProblems) {
+    if (!p.pythonSolution || p.pythonSolution.length < 30 || !p.javaSolution || p.javaSolution.length < 30) {
+      allMultiLanguageValid = false;
+      break;
+    }
+  }
+  assert(allMultiLanguageValid, '7. All 67 problems contain complete verified Python and Java solutions (201 solutions total)');
 
   console.log('\n======================================================');
   console.log(`ALL CURRICULUM TESTS PASSED: ${passedCount} / ${testCount} assertions passed`);

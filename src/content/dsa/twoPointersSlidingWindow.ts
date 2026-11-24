@@ -64,6 +64,68 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
+        nums.sort()
+        result: list[list[int]] = []
+        n = len(nums)
+
+        for i in range(n - 2):
+            if nums[i] > 0:
+                break
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+
+            left, right = i + 1, n - 1
+            while left < right:
+                total = nums[i] + nums[left] + nums[right]
+                if total == 0:
+                    result.append([nums[i], nums[left], nums[right]])
+                    while left < right and nums[left] == nums[left + 1]:
+                        left += 1
+                    while left < right and nums[right] == nums[right - 1]:
+                        right -= 1
+                    left += 1
+                    right -= 1
+                elif total < 0:
+                    left += 1
+                else:
+                    right -= 1
+
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        for (int i = 0; i < n - 2; i++) {
+            if (nums[i] > 0) break;
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            int left = i + 1;
+            int right = n - 1;
+
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (sum == 0) {
+                    result.add(Arrays.asList(nums[i], nums[left], nums[right]));
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++;
+                    right--;
+                } else if (sum < 0) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+        return result;
+    }
+}`,
     edgeCases: ['Array of all zeroes [0, 0, 0]', 'No triplets sum to 0', 'Many duplicate elements throughout array'],
     commonMistakes: [
       'Using a hash set to deduplicate triplets instead of pruning adjacent duplicates in the sorted array, causing TLE or extra space',
@@ -122,6 +184,40 @@ public:
         return maxWater;
     }
 };`,
+    pythonSolution: `class Solution:
+    def maxArea(self, height: list[int]) -> int:
+        left, right = 0, len(height) - 1
+        max_water = 0
+
+        while left < right:
+            h = min(height[left], height[right])
+            max_water = max(max_water, h * (right - left))
+
+            if height[left] < height[right]:
+                left += 1
+            else:
+                right -= 1
+
+        return max_water`,
+    javaSolution: `class Solution {
+    public int maxArea(int[] height) {
+        int left = 0;
+        int right = height.length - 1;
+        int maxWater = 0;
+
+        while (left < right) {
+            int h = Math.min(height[left], height[right]);
+            maxWater = Math.max(maxWater, h * (right - left));
+
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return maxWater;
+    }
+}`,
     edgeCases: ['Two lines only', 'Heights forming a plateau', 'Decreasing staircase of heights'],
     commonMistakes: ['Moving the pointer with greater height, which can never result in a larger area'],
     interviewExplanation:
@@ -166,6 +262,29 @@ public:
         return k;
     }
 };`,
+    pythonSolution: `class Solution:
+    def removeDuplicates(self, nums: list[int]) -> int:
+        if not nums:
+            return 0
+        k = 1
+        for i in range(1, len(nums)):
+            if nums[i] != nums[k - 1]:
+                nums[k] = nums[i]
+                k += 1
+        return k`,
+    javaSolution: `class Solution {
+    public int removeDuplicates(int[] nums) {
+        if (nums.length == 0) return 0;
+        int k = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] != nums[k - 1]) {
+                nums[k] = nums[i];
+                k++;
+            }
+        }
+        return k;
+    }
+}`,
     edgeCases: ['Array with all distinct elements', 'Array where all elements are identical', 'Array of size 1'],
     commonMistakes: ['Calling std::vector::erase, which runs in O(n) per deletion leading to O(n^2) total time'],
     interviewExplanation:
@@ -226,6 +345,48 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def sortedSquares(self, nums: list[int]) -> list[int]:
+        n = len(nums)
+        result = [0] * n
+        left, right = 0, n - 1
+        pos = n - 1
+
+        while left <= right:
+            left_sq = nums[left] * nums[left]
+            right_sq = nums[right] * nums[right]
+            if left_sq > right_sq:
+                result[pos] = left_sq
+                left += 1
+            else:
+                result[pos] = right_sq
+                right -= 1
+            pos -= 1
+
+        return result`,
+    javaSolution: `class Solution {
+    public int[] sortedSquares(int[] nums) {
+        int n = nums.length;
+        int[] result = new int[n];
+        int left = 0;
+        int right = n - 1;
+        int pos = n - 1;
+
+        while (left <= right) {
+            int leftSq = nums[left] * nums[left];
+            int rightSq = nums[right] * nums[right];
+
+            if (leftSq > rightSq) {
+                result[pos--] = leftSq;
+                left++;
+            } else {
+                result[pos--] = rightSq;
+                right--;
+            }
+        }
+        return result;
+    }
+}`,
     edgeCases: ['All negative numbers', 'All positive numbers', 'Array with zeroes and negative values'],
     commonMistakes: ['Squaring every element and calling std::sort (O(n log n)) instead of the optimal O(n) two-pointer merge'],
     interviewExplanation:
@@ -282,6 +443,37 @@ public:
         return (minLength == INT_MAX) ? 0 : minLength;
     }
 };`,
+    pythonSolution: `class Solution:
+    def minSubArrayLen(self, target: int, nums: list[int]) -> int:
+        left = 0
+        current_sum = 0
+        min_length = float('inf')
+
+        for right in range(len(nums)):
+            current_sum += nums[right]
+            while current_sum >= target:
+                min_length = min(min_length, right - left + 1)
+                current_sum -= nums[left]
+                left += 1
+
+        return 0 if min_length == float('inf') else int(min_length)`,
+    javaSolution: `class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+        int left = 0;
+        int currentSum = 0;
+        int minLength = Integer.MAX_VALUE;
+
+        for (int right = 0; right < nums.length; right++) {
+            currentSum += nums[right];
+            while (currentSum >= target) {
+                minLength = Math.min(minLength, right - left + 1);
+                currentSum -= nums[left];
+                left++;
+            }
+        }
+        return minLength == Integer.MAX_VALUE ? 0 : minLength;
+    }
+}`,
     edgeCases: ['Sum of all elements is strictly less than target (return 0)', 'Single element equals target (return 1)', 'Target requires entire array'],
     commonMistakes: ['Thinking the while loop inside the for loop makes it O(n^2); each element enters and leaves the window at most once, so it is strictly O(n) amortized'],
     interviewExplanation:
@@ -343,6 +535,56 @@ public:
         return false;
     }
 };`,
+    pythonSolution: `class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        n1, n2 = len(s1), len(s2)
+        if n1 > n2:
+            return False
+
+        count1 = [0] * 26
+        count2 = [0] * 26
+
+        for i in range(n1):
+            count1[ord(s1[i]) - ord('a')] += 1
+            count2[ord(s2[i]) - ord('a')] += 1
+
+        if count1 == count2:
+            return True
+
+        for i in range(n1, n2):
+            count2[ord(s2[i]) - ord('a')] += 1
+            count2[ord(s2[i - n1]) - ord('a')] -= 1
+            if count1 == count2:
+                return True
+
+        return False`,
+    javaSolution: `import java.util.Arrays;
+
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        int n1 = s1.length();
+        int n2 = s2.length();
+        if (n1 > n2) return false;
+
+        int[] count1 = new int[26];
+        int[] count2 = new int[26];
+
+        for (int i = 0; i < n1; i++) {
+            count1[s1.charAt(i) - 'a']++;
+            count2[s2.charAt(i) - 'a']++;
+        }
+
+        if (Arrays.equals(count1, count2)) return true;
+
+        for (int i = n1; i < n2; i++) {
+            count2[s2.charAt(i) - 'a']++;
+            count2[s2.charAt(i - n1) - 'a']--;
+            if (Arrays.equals(count1, count2)) return true;
+        }
+
+        return false;
+    }
+}`,
     edgeCases: ['s1 longer than s2 (return false immediately)', 's1 and s2 of equal length', 'Permutation located at the very start or very end of s2'],
     commonMistakes: ['Sorting substrings of size n1 at every index, which degrades runtime to O(n2 * n1 log n1)'],
     interviewExplanation:

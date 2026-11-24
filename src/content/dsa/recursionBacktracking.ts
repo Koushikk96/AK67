@@ -44,6 +44,39 @@ private:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def subsets(self, nums: list[int]) -> list[list[int]]:
+        result: list[list[int]] = []
+        current: list[int] = []
+
+        def backtrack(start: int) -> None:
+            result.append(list(current))
+            for i in range(start, len(nums)):
+                current.append(nums[i])
+                backtrack(i + 1)
+                current.pop()
+
+        backtrack(0)
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        List<Integer> current = new ArrayList<>();
+        backtrack(0, nums, current, result);
+        return result;
+    }
+
+    private void backtrack(int start, int[] nums, List<Integer> current, List<List<Integer>> result) {
+        result.add(new ArrayList<>(current));
+        for (int i = start; i < nums.length; i++) {
+            current.add(nums[i]);
+            backtrack(i + 1, nums, current, result);
+            current.remove(current.size() - 1);
+        }
+    }
+}`,
     edgeCases: ['Array of length 1 (returns [[], [x]])', 'Empty subset is always included'],
     commonMistakes: ['Passing current by value instead of reference, multiplying space and copying overhead exponentially'],
     interviewExplanation:
@@ -97,6 +130,45 @@ private:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def permute(self, nums: list[int]) -> list[list[int]]:
+        result: list[list[int]] = []
+
+        def backtrack(first: int) -> None:
+            if first == len(nums):
+                result.append(list(nums))
+                return
+
+            for i in range(first, len(nums)):
+                nums[first], nums[i] = nums[i], nums[first]
+                backtrack(first + 1)
+                nums[first], nums[i] = nums[i], nums[first]
+
+        backtrack(0)
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        List<Integer> list = new ArrayList<>();
+        for (int num : nums) list.add(num);
+        backtrack(0, list, result);
+        return result;
+    }
+
+    private void backtrack(int first, List<Integer> nums, List<List<Integer>> result) {
+        if (first == nums.size()) {
+            result.add(new ArrayList<>(nums));
+            return;
+        }
+        for (int i = first; i < nums.size(); i++) {
+            Collections.swap(nums, first, i);
+            backtrack(first + 1, nums, result);
+            Collections.swap(nums, first, i);
+        }
+    }
+}`,
     edgeCases: ['Array of size 1 (1 permutation)', 'Array of size 2'],
     commonMistakes: ['Forgetting the undo swap (nums[first], nums[i]) which corrupts subsequent recursive branches'],
     interviewExplanation:
@@ -160,6 +232,54 @@ private:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def combinationSum(self, candidates: list[int], target: int) -> list[list[int]]:
+        candidates.sort()
+        result: list[list[int]] = []
+        current: list[int] = []
+
+        def backtrack(start: int, remaining: int) -> None:
+            if remaining == 0:
+                result.append(list(current))
+                return
+
+            for i in range(start, len(candidates)):
+                if candidates[i] > remaining:
+                    break
+
+                current.append(candidates[i])
+                backtrack(i, remaining - candidates[i])
+                current.pop()
+
+        backtrack(0, target)
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        List<List<Integer>> result = new ArrayList<>();
+        List<Integer> current = new ArrayList<>();
+        backtrack(0, target, candidates, current, result);
+        return result;
+    }
+
+    private void backtrack(int start, int remaining, int[] candidates,
+                          List<Integer> current, List<List<Integer>> result) {
+        if (remaining == 0) {
+            result.add(new ArrayList<>(current));
+            return;
+        }
+
+        for (int i = start; i < candidates.length; i++) {
+            if (candidates[i] > remaining) break;
+
+            current.add(candidates[i]);
+            backtrack(i, remaining - candidates[i], candidates, current, result);
+            current.remove(current.size() - 1);
+        }
+    }
+}`,
     edgeCases: ['Target smaller than smallest candidate (returns [])', 'Single candidate dividing target evenly', 'Multiple combinations of different lengths'],
     commonMistakes: ['Passing 0 instead of start index i, causing duplicate permutations of the same combination like [2, 2, 3] and [3, 2, 2]'],
     interviewExplanation:
@@ -222,6 +342,60 @@ private:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def letterCombinations(self, digits: str) -> list[str]:
+        if not digits:
+            return []
+
+        mapping = {
+            '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+            '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+        }
+        result: list[str] = []
+        current: list[str] = []
+
+        def backtrack(index: int) -> None:
+            if index == len(digits):
+                result.append("".join(current))
+                return
+
+            for ch in mapping[digits[index]]:
+                current.append(ch)
+                backtrack(index + 1)
+                current.pop()
+
+        backtrack(0)
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<String> letterCombinations(String digits) {
+        if (digits == null || digits.isEmpty()) return new ArrayList<>();
+
+        String[] mapping = {
+            "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"
+        };
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        backtrack(0, digits, mapping, current, result);
+        return result;
+    }
+
+    private void backtrack(int index, String digits, String[] mapping,
+                           StringBuilder current, List<String> result) {
+        if (index == digits.length()) {
+            result.add(current.toString());
+            return;
+        }
+
+        String letters = mapping[digits.charAt(index) - '0'];
+        for (int i = 0; i < letters.length(); i++) {
+            current.append(letters.charAt(i));
+            backtrack(index + 1, digits, mapping, current, result);
+            current.deleteCharAt(current.length() - 1);
+        }
+    }
+}`,
     edgeCases: ['Empty input string digits = "" (must return empty list [])', 'Single digit', 'Digit with 4 letters (\'7\' or \'9\')'],
     commonMistakes: ['Returning [""] instead of [] for empty input string'],
     interviewExplanation:
@@ -282,6 +456,58 @@ private:
         }
     }
 };`,
+    pythonSolution: `class Solution:
+    def generateParenthesis(self, n: int) -> list[str]:
+        result: list[str] = []
+        current: list[str] = []
+
+        def backtrack(open_count: int, close_count: int) -> None:
+            if len(current) == 2 * n:
+                result.append("".join(current))
+                return
+
+            if open_count < n:
+                current.append('(')
+                backtrack(open_count + 1, close_count)
+                current.pop()
+
+            if close_count < open_count:
+                current.append(')')
+                backtrack(open_count, close_count + 1)
+                current.pop()
+
+        backtrack(0, 0)
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        backtrack(0, 0, n, current, result);
+        return result;
+    }
+
+    private void backtrack(int openCount, int closeCount, int n,
+                           StringBuilder current, List<String> result) {
+        if (current.length() == 2 * n) {
+            result.add(current.toString());
+            return;
+        }
+
+        if (openCount < n) {
+            current.append('(');
+            backtrack(openCount + 1, closeCount, n, current, result);
+            current.deleteCharAt(current.length() - 1);
+        }
+
+        if (closeCount < openCount) {
+            current.append(')');
+            backtrack(openCount, closeCount + 1, n, current, result);
+            current.deleteCharAt(current.length() - 1);
+        }
+    }
+}`,
     edgeCases: ['n = 1 (returns ["()"])', 'Maximum constraint n = 8 (1430 combinations)'],
     commonMistakes: ['Generating all 2^(2n) strings and filtering with a stack afterwards, which explodes exponentially compared to pruning on the fly'],
     interviewExplanation:

@@ -46,6 +46,44 @@ public:
         return st.empty();
     }
 };`,
+    pythonSolution: `class Solution:
+    def isValid(self, s: str) -> bool:
+        if len(s) % 2 != 0:
+            return False
+
+        stack: list[str] = []
+        matching = {')': '(', '}': '{', ']': '['}
+
+        for ch in s:
+            if ch in '({[':
+                stack.append(ch)
+            else:
+                if not stack or stack[-1] != matching[ch]:
+                    return False
+                stack.pop()
+
+        return len(stack) == 0`,
+    javaSolution: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public boolean isValid(String s) {
+        if (s.length() % 2 != 0) return false;
+
+        Deque<Character> stack = new ArrayDeque<>();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '(') stack.push(')');
+            else if (c == '{') stack.push('}');
+            else if (c == '[') stack.push(']');
+            else {
+                if (stack.isEmpty() || stack.pop() != c) return false;
+            }
+        }
+
+        return stack.isEmpty();
+    }
+}`,
     edgeCases: ['Single closing bracket at start', 'Stack non-empty at end', 'Odd length input'],
     commonMistakes: ['Calling st.top() when st is empty causing undefined behavior or segmentation fault'],
     interviewExplanation:
@@ -105,6 +143,58 @@ public:
         return minStack.top();
     }
 };`,
+    pythonSolution: `class MinStack:
+    def __init__(self):
+        self.stack: list[int] = []
+        self.min_stack: list[int] = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        if not self.min_stack or val <= self.min_stack[-1]:
+            self.min_stack.append(val)
+        else:
+            self.min_stack.append(self.min_stack[-1])
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]`,
+    javaSolution: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class MinStack {
+    private Deque<Integer> mainStack;
+    private Deque<Integer> minStack;
+
+    public MinStack() {
+        mainStack = new ArrayDeque<>();
+        minStack = new ArrayDeque<>();
+    }
+
+    public void push(int val) {
+        mainStack.push(val);
+        int currentMin = minStack.isEmpty() ? val : Math.min(val, minStack.peek());
+        minStack.push(currentMin);
+    }
+
+    public void pop() {
+        mainStack.pop();
+        minStack.pop();
+    }
+
+    public int top() {
+        return mainStack.peek();
+    }
+
+    public int getMin() {
+        return minStack.peek();
+    }
+}`,
     edgeCases: ['Pushing duplicate minimum values', 'Removing the current minimum element', 'Single element stack'],
     commonMistakes: ['Only storing a single min variable, which is lost when the minimum element is popped'],
     interviewExplanation:
@@ -173,6 +263,67 @@ public:
         return inStack.empty() && outStack.empty();
     }
 };`,
+    pythonSolution: `class MyQueue:
+    def __init__(self):
+        self.in_stack: list[int] = []
+        self.out_stack: list[int] = []
+
+    def push(self, x: int) -> None:
+        self.in_stack.append(x)
+
+    def _transfer_if_empty(self) -> None:
+        if not self.out_stack:
+            while self.in_stack:
+                self.out_stack.append(self.in_stack.pop())
+
+    def pop(self) -> int:
+        self._transfer_if_empty()
+        return self.out_stack.pop()
+
+    def peek(self) -> int:
+        self._transfer_if_empty()
+        return self.out_stack[-1]
+
+    def empty(self) -> bool:
+        return len(self.in_stack) == 0 and len(self.out_stack) == 0`,
+    javaSolution: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class MyQueue {
+    private Deque<Integer> inStack;
+    private Deque<Integer> outStack;
+
+    public MyQueue() {
+        inStack = new ArrayDeque<>();
+        outStack = new ArrayDeque<>();
+    }
+
+    private void transferIfEmpty() {
+        if (outStack.isEmpty()) {
+            while (!inStack.isEmpty()) {
+                outStack.push(inStack.pop());
+            }
+        }
+    }
+
+    public void push(int x) {
+        inStack.push(x);
+    }
+
+    public int pop() {
+        transferIfEmpty();
+        return outStack.pop();
+    }
+
+    public int peek() {
+        transferIfEmpty();
+        return outStack.peek();
+    }
+
+    public boolean empty() {
+        return inStack.isEmpty() && outStack.isEmpty();
+    }
+}`,
     edgeCases: ['Interleaved push and pop calls', 'Multiple consecutive peek calls without pop'],
     commonMistakes: ['Transferring elements back and forth on every operation, degrading time to O(n) per call'],
     interviewExplanation:
@@ -222,6 +373,39 @@ public:
         return answer;
     }
 };`,
+    pythonSolution: `class Solution:
+    def dailyTemperatures(self, temperatures: list[int]) -> list[int]:
+        n = len(temperatures)
+        answer = [0] * n
+        stack: list[int] = []  # indices
+
+        for i in range(n):
+            while stack and temperatures[i] > temperatures[stack[-1]]:
+                prev = stack.pop()
+                answer[prev] = i - prev
+            stack.append(i)
+
+        return answer`,
+    javaSolution: `import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public int[] dailyTemperatures(int[] temperatures) {
+        int n = temperatures.length;
+        int[] answer = new int[n];
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        for (int i = 0; i < n; i++) {
+            while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
+                int prev = stack.pop();
+                answer[prev] = i - prev;
+            }
+            stack.push(i);
+        }
+
+        return answer;
+    }
+}`,
     edgeCases: ['Strictly decreasing temperatures (all 0s)', 'Strictly increasing temperatures (all 1s except last)', 'Plateau temperatures'],
     commonMistakes: ['Storing temperatures instead of indices in the stack; storing indices gives both value and distance'],
     interviewExplanation:
@@ -277,6 +461,42 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def nextGreaterElement(self, nums1: list[int], nums2: list[int]) -> list[int]:
+        next_greater: dict[int, int] = {}
+        stack: list[int] = []
+
+        for num in nums2:
+            while stack and num > stack[-1]:
+                next_greater[stack.pop()] = num
+            stack.append(num)
+
+        return [next_greater.get(num, -1) for num in nums1]`,
+    javaSolution: `import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        Map<Integer, Integer> nextGreater = new HashMap<>();
+        Deque<Integer> stack = new ArrayDeque<>();
+
+        for (int num : nums2) {
+            while (!stack.isEmpty() && num > stack.peek()) {
+                nextGreater.put(stack.pop(), num);
+            }
+            stack.push(num);
+        }
+
+        int[] result = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++) {
+            result[i] = nextGreater.getOrDefault(nums1[i], -1);
+        }
+
+        return result;
+    }
+}`,
     edgeCases: ['Element is the largest in nums2 (maps to -1)', 'nums1 identical to nums2'],
     commonMistakes: ['Searching linearly in nums2 for every element in nums1, which causes O(nums1 * nums2) runtime'],
     interviewExplanation:

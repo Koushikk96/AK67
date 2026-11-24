@@ -66,6 +66,63 @@ private:
         dfs(grid, r, c - 1, m, n);
     }
 };`,
+    pythonSolution: `class Solution:
+    def numIslands(self, grid: list[list[str]]) -> int:
+        if not grid:
+            return 0
+
+        m, n = len(grid), len(grid[0])
+        count = 0
+
+        def dfs(r: int, c: int) -> None:
+            if r < 0 or r >= m or c < 0 or c >= n or grid[r][c] != '1':
+                return
+            grid[r][c] = '0'
+            dfs(r + 1, c)
+            dfs(r - 1, c)
+            dfs(r, c + 1)
+            dfs(r, c - 1)
+
+        for r in range(m):
+            for c in range(n):
+                if grid[r][c] == '1':
+                    count += 1
+                    dfs(r, c)
+
+        return count`,
+    javaSolution: `class Solution {
+    public int numIslands(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+
+        int m = grid.length;
+        int n = grid[0].length;
+        int count = 0;
+
+        for (int r = 0; r < m; r++) {
+            for (int c = 0; c < n; c++) {
+                if (grid[r][c] == '1') {
+                    count++;
+                    dfs(grid, r, c, m, n);
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private void dfs(char[][] grid, int r, int c, int m, int n) {
+        if (r < 0 || r >= m || c < 0 || c >= n || grid[r][c] != '1') {
+            return;
+        }
+
+        grid[r][c] = '0';
+
+        dfs(grid, r + 1, c, m, n);
+        dfs(grid, r - 1, c, m, n);
+        dfs(grid, r, c + 1, m, n);
+        dfs(grid, r, c - 1, m, n);
+    }
+}`,
     edgeCases: ['Grid with all water \'0\'', 'Grid with all land \'1\' (1 island)', '1x1 grid'],
     commonMistakes: ['Diagonal traversal (islands only connect horizontally and vertically)'],
     interviewExplanation:
@@ -124,6 +181,48 @@ private:
         dfs(image, r, c - 1, origColor, newColor);
     }
 };`,
+    pythonSolution: `class Solution:
+    def floodFill(self, image: list[list[int]], sr: int, sc: int, color: int) -> list[list[int]]:
+        orig_color = image[sr][sc]
+        if orig_color == color:
+            return image
+
+        m, n = len(image), len(image[0])
+
+        def dfs(r: int, c: int) -> None:
+            if r < 0 or r >= m or c < 0 or c >= n or image[r][c] != orig_color:
+                return
+            image[r][c] = color
+            dfs(r + 1, c)
+            dfs(r - 1, c)
+            dfs(r, c + 1)
+            dfs(r, c - 1)
+
+        dfs(sr, sc)
+        return image`,
+    javaSolution: `class Solution {
+    public int[][] floodFill(int[][] image, int sr, int sc, int color) {
+        int originalColor = image[sr][sc];
+        if (originalColor != color) {
+            dfs(image, sr, sc, originalColor, color);
+        }
+        return image;
+    }
+
+    private void dfs(int[][] image, int r, int c, int origColor, int newColor) {
+        if (r < 0 || r >= image.length || c < 0 || c >= image[0].length ||
+            image[r][c] != origColor) {
+            return;
+        }
+
+        image[r][c] = newColor;
+
+        dfs(image, r + 1, c, origColor, newColor);
+        dfs(image, r - 1, c, origColor, newColor);
+        dfs(image, r, c + 1, origColor, newColor);
+        dfs(image, r, c - 1, origColor, newColor);
+    }
+}`,
     edgeCases: ['Target color is already the starting color (must early-exit to avoid infinite recursion)', '1x1 image', 'Disconnected pixels with original color'],
     commonMistakes: ['Not checking originalColor == color, causing infinite recursion stack overflow'],
     interviewExplanation:
@@ -188,6 +287,70 @@ public:
         return false;
     }
 };`,
+    pythonSolution: `from collections import deque
+
+class Solution:
+    def validPath(self, n: int, edges: list[list[int]], source: int, destination: int) -> bool:
+        if source == destination:
+            return True
+
+        adj: list[list[int]] = [[] for _ in range(n)]
+        for u, v in edges:
+            adj[u].append(v)
+            adj[v].append(u)
+
+        visited = [False] * n
+        q = deque([source])
+        visited[source] = True
+
+        while q:
+            curr = q.popleft()
+            if curr == destination:
+                return True
+
+            for neighbor in adj[curr]:
+                if not visited[neighbor]:
+                    visited[neighbor] = True
+                    q.append(neighbor)
+
+        return False`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public boolean validPath(int n, int[][] edges, int source, int destination) {
+        if (source == destination) return true;
+
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        for (int[] edge : edges) {
+            adj.get(edge[0]).add(edge[1]);
+            adj.get(edge[1]).add(edge[0]);
+        }
+
+        boolean[] visited = new boolean[n];
+        Queue<Integer> q = new LinkedList<>();
+
+        q.offer(source);
+        visited[source] = true;
+
+        while (!q.isEmpty()) {
+            int curr = q.poll();
+            if (curr == destination) return true;
+
+            for (int neighbor : adj.get(curr)) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.offer(neighbor);
+                }
+            }
+        }
+
+        return false;
+    }
+}`,
     edgeCases: ['source == destination (returns true)', 'No edges in graph', 'Graph with disconnected components'],
     commonMistakes: ['Building an n x n adjacency matrix when n <= 2 * 10^5, causing memory limit exceeded (O(V^2))'],
     interviewExplanation:

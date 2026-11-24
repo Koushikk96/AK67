@@ -41,6 +41,40 @@ public:
         return 1 + std::max(maxDepth(root->left), maxDepth(root->right));
     }
 };`,
+    pythonSolution: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+from typing import Optional
+
+class Solution:
+    def maxDepth(self, root: Optional['TreeNode']) -> int:
+        if not root:
+            return 0
+        return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))`,
+    javaSolution: `/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+    }
+}`,
     edgeCases: ['Empty tree (returns 0)', 'Single-node tree (returns 1)', 'Skewed tree (degenerates to linked list)'],
     commonMistakes: ['Forgetting base case null check causing segfault'],
     interviewExplanation:
@@ -83,6 +117,31 @@ public:
         return root;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def invertTree(self, root: Optional['TreeNode']) -> Optional['TreeNode']:
+        if not root:
+            return None
+
+        root.left, root.right = root.right, root.left
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        return root`,
+    javaSolution: `class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if (root == null) return null;
+
+        TreeNode temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+
+        invertTree(root.left);
+        invertTree(root.right);
+
+        return root;
+    }
+}`,
     edgeCases: ['Empty tree', 'Single node', 'Asymmetric / unbalanced tree'],
     commonMistakes: ['Recursing before swapping without caching pointers if swapping left/right individually'],
     interviewExplanation:
@@ -143,6 +202,56 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `from collections import deque
+from typing import Optional
+
+class Solution:
+    def levelOrder(self, root: Optional['TreeNode']) -> list[list[int]]:
+        if not root:
+            return []
+
+        result: list[list[int]] = []
+        q: deque['TreeNode'] = deque([root])
+
+        while q:
+            level_size = len(q)
+            current_level: list[int] = []
+            for _ in range(level_size):
+                node = q.popleft()
+                current_level.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            result.append(current_level)
+
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if (root == null) return new ArrayList<>();
+
+        List<List<Integer>> result = new ArrayList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        q.offer(root);
+
+        while (!q.isEmpty()) {
+            int levelSize = q.size();
+            List<Integer> currentLevel = new ArrayList<>(levelSize);
+
+            for (int i = 0; i < levelSize; i++) {
+                TreeNode node = q.poll();
+                currentLevel.add(node.val);
+                if (node.left != null) q.offer(node.left);
+                if (node.right != null) q.offer(node.right);
+            }
+            result.add(currentLevel);
+        }
+
+        return result;
+    }
+}`,
     edgeCases: ['Empty tree (returns empty 2D vector)', 'Skewed tree (single node per level)', 'Full binary tree'],
     commonMistakes: ['Calling q.size() inside the inner loop condition, which changes as children are pushed'],
     interviewExplanation:
@@ -190,6 +299,32 @@ private:
                validate(node->right, node->val, maxVal);
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def isValidBST(self, root: Optional['TreeNode']) -> bool:
+        def validate(node: Optional['TreeNode'], min_val: float, max_val: float) -> bool:
+            if not node:
+                return True
+            if not (min_val < node.val < max_val):
+                return False
+            return validate(node.left, min_val, node.val) and validate(node.right, node.val, max_val)
+
+        return validate(root, float('-inf'), float('inf'))`,
+    javaSolution: `class Solution {
+    public boolean isValidBST(TreeNode root) {
+        return validate(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private boolean validate(TreeNode node, long minVal, long maxVal) {
+        if (node == null) return true;
+        if (node.val <= minVal || node.val >= maxVal) {
+            return false;
+        }
+        return validate(node.left, minVal, node.val) &&
+               validate(node.right, node.val, maxVal);
+    }
+}`,
     edgeCases: ['Node values equal to INT_MAX or INT_MIN (use long long bounds to prevent overflow)', 'Duplicate values (invalid in strict BST)'],
     commonMistakes: ['Only validating immediate children rather than subtrees as a whole'],
     interviewExplanation:
@@ -237,6 +372,36 @@ public:
         return nullptr;
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        curr = root
+        while curr:
+            if p.val < curr.val and q.val < curr.val:
+                curr = curr.left
+            elif p.val > curr.val and q.val > curr.val:
+                curr = curr.right
+            else:
+                return curr
+        return None`,
+    javaSolution: `class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        TreeNode curr = root;
+
+        while (curr != null) {
+            if (p.val < curr.val && q.val < curr.val) {
+                curr = curr.left;
+            } else if (p.val > curr.val && q.val > curr.val) {
+                curr = curr.right;
+            } else {
+                return curr;
+            }
+        }
+
+        return null;
+    }
+}`,
     edgeCases: ['p is the parent of q (or vice-versa)', 'p and q are on opposite sides of root', 'Tree is degenerate line'],
     commonMistakes: ['Using standard binary tree LCA traversal (O(n)) when BST property permits O(h) direct descent'],
     interviewExplanation:
@@ -286,6 +451,40 @@ private:
         return 1 + std::max(leftH, rightH);
     }
 };`,
+    pythonSolution: `from typing import Optional
+
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional['TreeNode']) -> int:
+        max_diameter = 0
+
+        def height(node: Optional['TreeNode']) -> int:
+            nonlocal max_diameter
+            if not node:
+                return 0
+            left_h = height(node.left)
+            right_h = height(node.right)
+            max_diameter = max(max_diameter, left_h + right_h)
+            return 1 + max(left_h, right_h)
+
+        height(root)
+        return max_diameter`,
+    javaSolution: `class Solution {
+    private int maxDiameter = 0;
+
+    public int diameterOfBinaryTree(TreeNode root) {
+        maxDiameter = 0;
+        height(root);
+        return maxDiameter;
+    }
+
+    private int height(TreeNode node) {
+        if (node == null) return 0;
+        int leftH = height(node.left);
+        int rightH = height(node.right);
+        maxDiameter = Math.max(maxDiameter, leftH + rightH);
+        return 1 + Math.max(leftH, rightH);
+    }
+}`,
     edgeCases: ['Longest path does not pass through the root', 'Single node tree (diameter is 0 edges)', 'Two node tree (diameter 1)'],
     commonMistakes: ['Assuming the diameter must pass through the tree root; a deep subtree can contain the diameter entirely'],
     interviewExplanation:

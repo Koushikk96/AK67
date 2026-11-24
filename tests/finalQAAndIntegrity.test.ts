@@ -139,6 +139,8 @@ async function runFinalQASuite() {
     dsaNumbers.add(p.number);
     assert(p.hints.length === 3, `DSA #${p.number} contains 3 progressive hints`);
     assert(p.cppSolution.length > 50, `DSA #${p.number} contains substantial C++ code`);
+    assert(p.pythonSolution.length > 30, `DSA #${p.number} contains substantial Python code`);
+    assert(p.javaSolution.length > 30, `DSA #${p.number} contains substantial Java code`);
     assert(p.timeComplexity.length > 0, `DSA #${p.number} specifies time complexity`);
     assert(p.spaceComplexity.length > 0, `DSA #${p.number} specifies space complexity`);
   }

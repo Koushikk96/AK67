@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { DSAProblem } from '@/types/dsa';
+import { DSAProblem, DSALanguage } from '@/types/dsa';
 import { CodingAssistanceLevel } from '@/types/database';
 import { dsaProblems } from '@/content/dsa';
 import { problemRepository } from '@/db/repositories/problemRepository';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
 import {
   ACTIVE_CODING_STORAGE_KEY,
+  LEGACY_CODING_STORAGE_KEY,
   setAssessmentActiveInMemory,
 } from '@/utils/pwaUtils';
 
@@ -17,6 +18,7 @@ export interface ActiveCodingSprint {
   status: 'solving' | 'submitted';
   revealedHints: number;
   showSolution: boolean;
+  selectedLanguage?: DSALanguage;
   assistanceLevel?: CodingAssistanceLevel;
   selfReportedMinutes?: number;
   userNotes?: string;
@@ -25,14 +27,28 @@ export interface ActiveCodingSprint {
 // Memory fallback for Node.js test environments
 let memorySprint: string | null = null;
 
-const getSavedSprint = (): ActiveCodingSprint | null => {
+export const setMemorySprintForTesting = (raw: string | null) => {
+  memorySprint = raw;
+};
+
+export const getSavedSprint = (): ActiveCodingSprint | null => {
   try {
-    const raw =
-      typeof localStorage !== 'undefined'
-        ? localStorage.getItem(ACTIVE_CODING_STORAGE_KEY)
-        : memorySprint;
+    let raw: string | null = null;
+    if (typeof localStorage !== 'undefined') {
+      raw =
+        localStorage.getItem(ACTIVE_CODING_STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_CODING_STORAGE_KEY);
+    } else {
+      raw = memorySprint;
+    }
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        if (!parsed.selectedLanguage) {
+          parsed.selectedLanguage = 'cpp';
+        }
+        return parsed;
+      }
     }
   } catch {
     // Ignore storage parsing errors
@@ -40,17 +56,19 @@ const getSavedSprint = (): ActiveCodingSprint | null => {
   return null;
 };
 
-const saveSprint = (sprint: ActiveCodingSprint | null) => {
+export const saveSprint = (sprint: ActiveCodingSprint | null) => {
   try {
     if (sprint) {
       const json = JSON.stringify(sprint);
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem(ACTIVE_CODING_STORAGE_KEY, json);
+        localStorage.setItem(LEGACY_CODING_STORAGE_KEY, json);
       }
       memorySprint = json;
     } else {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(ACTIVE_CODING_STORAGE_KEY);
+        localStorage.removeItem(LEGACY_CODING_STORAGE_KEY);
       }
       memorySprint = null;
     }
@@ -111,31 +129,56 @@ export const useCodingAssessment = () => {
   }, [activeSprint]);
 
   // Start a timed coding sprint on a selected or random DSA problem
-  const startSprint = useCallback((problemId?: string, durationMinutes: number = 30) => {
-    let target = dsaProblems[0];
-    if (problemId) {
-      const found = dsaProblems.find((p) => p.id === problemId);
-      if (found) target = found;
-    } else {
-      const randomIndex = Math.floor(Math.random() * dsaProblems.length);
-      target = dsaProblems[randomIndex];
-    }
+  const startSprint = useCallback(
+    (problemId?: string, durationMinutes: number = 30, language?: DSALanguage) => {
+      let target = dsaProblems[0];
+      if (problemId) {
+        const found = dsaProblems.find((p) => p.id === problemId);
+        if (found) target = found;
+      } else {
+        const randomIndex = Math.floor(Math.random() * dsaProblems.length);
+        target = dsaProblems[randomIndex];
+      }
 
-    const now = Date.now();
-    const sprint: ActiveCodingSprint = {
-      problem: target,
-      durationMinutes,
-      startTimestamp: now,
-      endTime: now + durationMinutes * 60 * 1000,
-      status: 'solving',
-      revealedHints: 0,
-      showSolution: false,
-    };
+      let lang = language;
+      if (!lang && typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
+        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
+          lang = saved;
+        }
+      }
+      if (!lang) lang = 'cpp';
 
-    saveSprint(sprint);
-    setActiveSprint(sprint);
-    setRemainingSeconds(durationMinutes * 60);
-    setAssessmentActiveInMemory(true);
+      const now = Date.now();
+      const sprint: ActiveCodingSprint = {
+        problem: target,
+        durationMinutes,
+        startTimestamp: now,
+        endTime: now + durationMinutes * 60 * 1000,
+        status: 'solving',
+        revealedHints: 0,
+        showSolution: false,
+        selectedLanguage: lang,
+      };
+
+      saveSprint(sprint);
+      setActiveSprint(sprint);
+      setRemainingSeconds(durationMinutes * 60);
+      setAssessmentActiveInMemory(true);
+    },
+    []
+  );
+
+  const setLanguage = useCallback((lang: DSALanguage) => {
+    setActiveSprint((prev) => {
+      if (!prev) return null;
+      const updated: ActiveCodingSprint = {
+        ...prev,
+        selectedLanguage: lang,
+      };
+      saveSprint(updated);
+      return updated;
+    });
   }, []);
 
   const revealNextHint = useCallback(() => {
@@ -221,10 +264,12 @@ export const useCodingAssessment = () => {
     remainingSeconds,
     revealedHints: activeSprint?.revealedHints || 0,
     showSolution: activeSprint?.showSolution || false,
+    selectedLanguage: activeSprint?.selectedLanguage || 'cpp',
     allProblems: dsaProblems,
     startSprint,
     revealNextHint,
     toggleSolution,
+    setLanguage,
     submitAttempt,
     exitSprint,
   };

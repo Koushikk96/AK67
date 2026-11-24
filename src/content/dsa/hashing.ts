@@ -50,6 +50,53 @@ public:
         return result;
     }
 };`,
+    pythonSolution: `class Solution:
+    def topKFrequent(self, nums: list[int], k: int) -> list[int]:
+        freq: dict[int, int] = {}
+        for num in nums:
+            freq[num] = freq.get(num, 0) + 1
+
+        n = len(nums)
+        buckets: list[list[int]] = [[] for _ in range(n + 1)]
+        for num, count in freq.items():
+            buckets[count].append(num)
+
+        result: list[int] = []
+        for i in range(n, 0, -1):
+            for num in buckets[i]:
+                result.append(num)
+                if len(result) == k:
+                    return result
+        return result`,
+    javaSolution: `import java.util.*;
+
+class Solution {
+    public int[] topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> freq = new HashMap<>();
+        for (int num : nums) {
+            freq.put(num, freq.getOrDefault(num, 0) + 1);
+        }
+
+        List<Integer>[] buckets = new List[nums.length + 1];
+        for (int i = 0; i <= nums.length; i++) {
+            buckets[i] = new ArrayList<>();
+        }
+
+        for (Map.Entry<Integer, Integer> entry : freq.entrySet()) {
+            buckets[entry.getValue()].add(entry.getKey());
+        }
+
+        int[] result = new int[k];
+        int idx = 0;
+        for (int i = nums.length; i >= 1 && idx < k; i--) {
+            for (int num : buckets[i]) {
+                result[idx++] = num;
+                if (idx == k) break;
+            }
+        }
+        return result;
+    }
+}`,
     edgeCases: ['All elements have the same frequency', 'k == number of unique elements', 'Negative numbers'],
     commonMistakes: ['Using standard std::sort on the frequency map which takes O(n log n), violating the better-than-O(n log n) constraint'],
     interviewExplanation:
@@ -105,6 +152,46 @@ public:
         return longest;
     }
 };`,
+    pythonSolution: `class Solution:
+    def longestConsecutive(self, nums: list[int]) -> int:
+        num_set = set(nums)
+        longest = 0
+
+        for num in num_set:
+            if num - 1 not in num_set:
+                current_num = num
+                current_streak = 1
+                while current_num + 1 in num_set:
+                    current_num += 1
+                    current_streak += 1
+                longest = max(longest, current_streak)
+
+        return longest`,
+    javaSolution: `import java.util.HashSet;
+import java.util.Set;
+
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+
+        int longest = 0;
+        for (int num : numSet) {
+            if (!numSet.contains(num - 1)) {
+                int currentNum = num;
+                int currentStreak = 1;
+                while (numSet.contains(currentNum + 1)) {
+                    currentNum++;
+                    currentStreak++;
+                }
+                longest = Math.max(longest, currentStreak);
+            }
+        }
+        return longest;
+    }
+}`,
     edgeCases: ['Empty array (returns 0)', 'Array with all duplicate values', 'Negative and positive numbers'],
     commonMistakes: ['Checking sequences from every number, causing O(n^2) time on sequences like [1, 2, 3, 4, 5]'],
     interviewExplanation:
@@ -154,6 +241,40 @@ public:
         return true;
     }
 };`,
+    pythonSolution: `class Solution:
+    def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+        if len(ransomNote) > len(magazine):
+            return False
+
+        counts: dict[str, int] = {}
+        for ch in magazine:
+            counts[ch] = counts.get(ch, 0) + 1
+
+        for ch in ransomNote:
+            if ch not in counts or counts[ch] <= 0:
+                return False
+            counts[ch] -= 1
+
+        return True`,
+    javaSolution: `class Solution {
+    public boolean canConstruct(String ransomNote, String magazine) {
+        if (ransomNote.length() > magazine.length()) return false;
+
+        int[] counts = new int[26];
+        for (int i = 0; i < magazine.length(); i++) {
+            counts[magazine.charAt(i) - 'a']++;
+        }
+
+        for (int i = 0; i < ransomNote.length(); i++) {
+            int idx = ransomNote.charAt(i) - 'a';
+            counts[idx]--;
+            if (counts[idx] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}`,
     edgeCases: ['ransomNote longer than magazine', 'All characters available in excess', 'Repeated required letters'],
     commonMistakes: ['Using an expensive hash map when a stack-allocated 26-element integer array is faster'],
     interviewExplanation:
@@ -209,6 +330,42 @@ public:
         return true;
     }
 };`,
+    pythonSolution: `class Solution:
+    def isIsomorphic(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+
+        last_seen_s: dict[str, int] = {}
+        last_seen_t: dict[str, int] = {}
+
+        for i, (cs, ct) in enumerate(zip(s, t)):
+            if last_seen_s.get(cs, -1) != last_seen_t.get(ct, -1):
+                return False
+            last_seen_s[cs] = i
+            last_seen_t[ct] = i
+
+        return True`,
+    javaSolution: `class Solution {
+    public boolean isIsomorphic(String s, String t) {
+        if (s.length() != t.length()) return false;
+
+        int[] lastSeenS = new int[256];
+        int[] lastSeenT = new int[256];
+
+        for (int i = 0; i < s.length(); i++) {
+            char cs = s.charAt(i);
+            char ct = t.charAt(i);
+
+            if (lastSeenS[cs] != lastSeenT[ct]) {
+                return false;
+            }
+
+            lastSeenS[cs] = i + 1;
+            lastSeenT[ct] = i + 1;
+        }
+        return true;
+    }
+}`,
     edgeCases: ['Characters mapping to themselves', 'Two characters in s mapping to the same character in t', 'ASCII non-letter characters'],
     commonMistakes: ['Only checking one-way mapping s -> t without verifying uniqueness from t -> s'],
     interviewExplanation:
@@ -274,6 +431,48 @@ public:
         return true;
     }
 };`,
+    pythonSolution: `class Solution:
+    def wordPattern(self, pattern: str, s: str) -> bool:
+        words = s.split()
+        if len(words) != len(pattern):
+            return False
+
+        char_to_word: dict[str, str] = {}
+        word_to_char: dict[str, str] = {}
+
+        for ch, word in zip(pattern, words):
+            if ch in char_to_word and char_to_word[ch] != word:
+                return False
+            if word in word_to_char and word_to_char[word] != ch:
+                return False
+            char_to_word[ch] = word
+            word_to_char[word] = ch
+
+        return True`,
+    javaSolution: `import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public boolean wordPattern(String pattern, String s) {
+        String[] words = s.split(" ");
+        if (words.length != pattern.length()) return false;
+
+        Map<Character, String> charToWord = new HashMap<>();
+        Map<String, Character> wordToChar = new HashMap<>();
+
+        for (int i = 0; i < pattern.length(); i++) {
+            char c = pattern.charAt(i);
+            String w = words[i];
+
+            if (charToWord.containsKey(c) && !charToWord.get(c).equals(w)) return false;
+            if (wordToChar.containsKey(w) && wordToChar.get(w) != c) return false;
+
+            charToWord.put(c, w);
+            wordToChar.put(w, c);
+        }
+        return true;
+    }
+}`,
     edgeCases: ['Word count != pattern character count', 'Different pattern characters mapping to identical word', 'Pattern of length 1'],
     commonMistakes: ['Only checking charToWord mapping, which falsely returns true for pattern="ab", s="dog dog"'],
     interviewExplanation:

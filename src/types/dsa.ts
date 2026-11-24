@@ -13,6 +13,8 @@ export type DSACategory =
   | 'Dynamic Programming'
   | 'Basic Graphs';
 
+export type DSALanguage = 'cpp' | 'python' | 'java';
+
 export interface DSAExample {
   input: string;
   output: string;
@@ -48,6 +50,10 @@ export interface DSAProblem {
   hints: [string, string, string];
   /** Verified modern C++ (C++17/20) reference solution suitable for technical rounds */
   cppSolution: string;
+  /** Verified modern Python (Python 3.11+) reference solution suitable for technical rounds */
+  pythonSolution: string;
+  /** Verified modern Java (Java 17/21) reference solution suitable for technical rounds */
+  javaSolution: string;
   /** Important edge cases to highlight during interview */
   edgeCases: string[];
   /** Common candidate mistakes and pitfalls */

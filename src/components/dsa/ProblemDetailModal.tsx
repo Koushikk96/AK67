@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { DSAProblemWithProgress } from '@/types/dsa';
+import React, { useState, useEffect } from 'react';
+import { DSAProblemWithProgress, DSALanguage } from '@/types/dsa';
 import { ProblemStatus } from '@/types/database';
+import { settingsRepository } from '@/db/repositories/settingsRepository';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -46,6 +47,61 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
   const [notesSavedNotice, setNotesSavedNotice] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
 
+  const [selectedLanguage, setSelectedLanguage] = useState<DSALanguage>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
+        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
+          return saved;
+        }
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    return 'cpp';
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    settingsRepository
+      .get<DSALanguage>('preferred_dsa_language')
+      .then((saved) => {
+        if (isMounted && saved && (saved === 'cpp' || saved === 'python' || saved === 'java')) {
+          setSelectedLanguage(saved);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLanguageChange = (lang: DSALanguage) => {
+    setSelectedLanguage(lang);
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('ak67_preferred_dsa_language', lang);
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    settingsRepository.set('preferred_dsa_language', lang).catch(() => {});
+  };
+
+  const activeSolution =
+    selectedLanguage === 'python'
+      ? problem.pythonSolution
+      : selectedLanguage === 'java'
+      ? problem.javaSolution
+      : problem.cppSolution;
+
+  const languageLabel =
+    selectedLanguage === 'python'
+      ? 'Python'
+      : selectedLanguage === 'java'
+      ? 'Java'
+      : 'C++';
+
   const toggleHint = (idx: number) => {
     setRevealedHints((prev) =>
       prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
@@ -62,9 +118,9 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
     }
   };
 
-  const copyCppCode = async () => {
+  const copySolutionCode = async () => {
     try {
-      await navigator.clipboard.writeText(problem.cppSolution);
+      await navigator.clipboard.writeText(activeSolution);
       setCodeCopied(true);
       setTimeout(() => setCodeCopied(false), 2000);
     } catch {
@@ -323,17 +379,48 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Verified C++ Reference Solution */}
+          {/* Verified Reference Solution with Multi-Language Selector */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Code2 className="h-3.5 w-3.5 text-blue-400" />
-                <span>Verified C++ Reference Solution</span>
-              </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Code2 className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Verified Reference Solution</span>
+                </h3>
+
+                {/* Language Switcher Tabs */}
+                <div
+                  className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950 p-0.5"
+                  role="tablist"
+                  aria-label="Solution Language Selector"
+                >
+                  {(['cpp', 'python', 'java'] as const).map((lang) => {
+                    const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                    const isSelected = selectedLanguage === lang;
+                    return (
+                      <button
+                        key={lang}
+                        type="button"
+                        role="tab"
+                        aria-selected={isSelected}
+                        onClick={() => handleLanguageChange(lang)}
+                        className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                          isSelected
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={copyCppCode}
+                onClick={copySolutionCode}
                 className="h-7 text-xs gap-1.5 border-zinc-700 bg-zinc-900"
               >
                 {codeCopied ? (
@@ -344,7 +431,7 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
                 ) : (
                   <>
                     <Copy className="h-3 w-3" />
-                    <span>Copy C++ Code</span>
+                    <span>Copy {languageLabel} Code</span>
                   </>
                 )}
               </Button>
@@ -352,7 +439,7 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
 
             <div className="relative rounded-lg border border-zinc-800 bg-[#09090b] p-4 overflow-x-auto">
               <pre className="font-mono text-xs text-zinc-300 leading-relaxed selection:bg-blue-600/30">
-                <code>{problem.cppSolution}</code>
+                <code>{activeSolution}</code>
               </pre>
             </div>
           </div>
