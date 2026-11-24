@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { DSAProblemWithProgress, DSALanguage } from '@/types/dsa';
+import React, { useState } from 'react';
+import { DSAProblemWithProgress } from '@/types/dsa';
 import { ProblemStatus } from '@/types/database';
-import { settingsRepository } from '@/db/repositories/settingsRepository';
+import { useDSALanguagePreference, getLanguageDisplayLabel, VALID_DSA_LANGUAGES } from '@/utils/dsaLanguage';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
@@ -47,46 +47,7 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
   const [notesSavedNotice, setNotesSavedNotice] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
 
-  const [selectedLanguage, setSelectedLanguage] = useState<DSALanguage>(() => {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
-        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
-          return saved;
-        }
-      }
-    } catch {
-      // Ignore storage errors
-    }
-    return 'cpp';
-  });
-
-  useEffect(() => {
-    let isMounted = true;
-    settingsRepository
-      .get<DSALanguage>('preferred_dsa_language')
-      .then((saved) => {
-        if (isMounted && saved && (saved === 'cpp' || saved === 'python' || saved === 'java')) {
-          setSelectedLanguage(saved);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const handleLanguageChange = (lang: DSALanguage) => {
-    setSelectedLanguage(lang);
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('ak67_preferred_dsa_language', lang);
-      }
-    } catch {
-      // Ignore storage errors
-    }
-    settingsRepository.set('preferred_dsa_language', lang).catch(() => {});
-  };
+  const { language: selectedLanguage, setLanguage: handleLanguageChange } = useDSALanguagePreference();
 
   const activeSolution =
     selectedLanguage === 'python'
@@ -196,14 +157,14 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Status Bar & Quick Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 max-w-full">
               <span className="text-xs text-zinc-400">Your Status:</span>
-              <div className="flex rounded-md border border-zinc-800 p-0.5 bg-zinc-900/80">
+              <div className="flex flex-wrap rounded-md border border-zinc-800 p-0.5 bg-zinc-900/80 max-w-full">
                 {(['not_started', 'attempted', 'solved', 'revise'] as ProblemStatus[]).map((st) => (
                   <button
                     key={st}
                     onClick={() => onUpdateStatus(problem.id, st)}
-                    className={`rounded px-2.5 py-1 text-xs font-medium transition ${
+                    className={`rounded px-2 sm:px-2.5 py-1 text-xs font-medium transition ${
                       currentStatus === st
                         ? st === 'solved'
                           ? 'bg-emerald-500/20 text-emerald-400 font-semibold'
@@ -394,8 +355,8 @@ export const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({
                   role="tablist"
                   aria-label="Solution Language Selector"
                 >
-                  {(['cpp', 'python', 'java'] as const).map((lang) => {
-                    const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                  {VALID_DSA_LANGUAGES.map((lang) => {
+                    const label = getLanguageDisplayLabel(lang);
                     const isSelected = selectedLanguage === lang;
                     return (
                       <button

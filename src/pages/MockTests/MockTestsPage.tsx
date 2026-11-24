@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMockTests } from '@/hooks/useMockTests';
 import { useCodingAssessment } from '@/hooks/useCodingAssessment';
-import { DSALanguage } from '@/types/dsa';
+import { useDSALanguagePreference, VALID_DSA_LANGUAGES, getLanguageDisplayLabel } from '@/utils/dsaLanguage';
 import { MockTestCategory, MockDifficulty, MockTestConfig, QuestionResultItem } from '@/types/mockTest';
 import { CodingAssistanceLevel } from '@/types/database';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
@@ -69,19 +69,7 @@ export const MockTestsPage: React.FC = () => {
   // Coding sprint form state
   const [selectedCodingProblemId, setSelectedCodingProblemId] = useState<string>(dsaProblems[0]?.id || '');
   const [sprintMinutes, setSprintMinutes] = useState<number>(30);
-  const [sprintLanguage, setSprintLanguage] = useState<DSALanguage>(() => {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
-        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
-          return saved;
-        }
-      }
-    } catch {
-      // Ignore storage errors
-    }
-    return 'cpp';
-  });
+  const { language: sprintLanguage, setLanguage: setSprintLanguage } = useDSALanguagePreference();
   const [codingAssistance, setCodingAssistance] = useState<CodingAssistanceLevel>('independent');
   const [codingActualMinutes, setCodingActualMinutes] = useState<number>(25);
   const [codingNotes, setCodingNotes] = useState<string>('');
@@ -892,8 +880,8 @@ export const MockTestsPage: React.FC = () => {
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-zinc-300">Sprint Language:</label>
                     <div className="grid grid-cols-3 gap-2">
-                      {(['cpp', 'python', 'java'] as const).map((lang) => {
-                        const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                      {VALID_DSA_LANGUAGES.map((lang) => {
+                        const label = getLanguageDisplayLabel(lang);
                         return (
                           <button
                             key={lang}
@@ -1002,8 +990,8 @@ export const MockTestsPage: React.FC = () => {
                         role="tablist"
                         aria-label="Active Sprint Language"
                       >
-                        {(['cpp', 'python', 'java'] as const).map((lang) => {
-                          const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                        {VALID_DSA_LANGUAGES.map((lang) => {
+                          const label = getLanguageDisplayLabel(lang);
                           const isCurrent = (coding.activeSprint?.selectedLanguage || 'cpp') === lang;
                           return (
                             <button
@@ -1191,8 +1179,8 @@ export const MockTestsPage: React.FC = () => {
                           </span>
                         </span>
                         <div className="flex items-center rounded-md border border-zinc-800 bg-zinc-950 p-0.5">
-                          {(['cpp', 'python', 'java'] as const).map((lang) => {
-                            const label = lang === 'cpp' ? 'C++' : lang === 'python' ? 'Python' : 'Java';
+                          {VALID_DSA_LANGUAGES.map((lang) => {
+                            const label = getLanguageDisplayLabel(lang);
                             const isCurrent = (coding.activeSprint?.selectedLanguage || 'cpp') === lang;
                             return (
                               <button

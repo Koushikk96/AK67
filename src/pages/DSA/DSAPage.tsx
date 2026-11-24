@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useDSAProblems } from '@/hooks/useDSAProblems';
 import { DSAProblemWithProgress, DSACategory } from '@/types/dsa';
+import { useDSALanguagePreference, VALID_DSA_LANGUAGES, getLanguageDisplayLabel } from '@/utils/dsaLanguage';
 import { ProblemDifficulty, ProblemStatus } from '@/types/database';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
 import { Badge } from '@/components/ui/Badge';
@@ -26,6 +27,7 @@ export const DSAPage: React.FC = () => {
 
   // Active filters and query
   const [searchQuery, setSearchQuery] = useState('');
+  const { language: preferredLanguage, setLanguage: setPreferredLanguage } = useDSALanguagePreference();
   const [selectedCategory, setSelectedCategory] = useState<DSACategory | 'All'>('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState<ProblemDifficulty | 'All'>('All');
   const [selectedStatus, setSelectedStatus] = useState<ProblemStatus | 'all' | 'bookmarked' | 'due'>('all');
@@ -111,8 +113,38 @@ export const DSAPage: React.FC = () => {
               67 DSA Placement Sheet
             </h1>
             <p className="text-xs text-zinc-400 max-w-2xl">
-              Master the exact 67 problems asked repeatedly in technical rounds. Each problem features progressive hints, complexity targets, verified C++ solutions, and spaced revision scheduling.
+              Master the exact 67 problems asked repeatedly in technical rounds. Each problem features progressive hints, complexity targets, verified C++, Python, and Java solutions (201 solutions total), and spaced revision scheduling.
             </p>
+            <div className="flex items-center gap-2 pt-1.5 flex-wrap">
+              <span className="text-xs text-zinc-400 font-medium">Preferred Language:</span>
+              <div
+                className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950 p-0.5"
+                role="tablist"
+                aria-label="Preferred DSA Solution Language"
+              >
+                {VALID_DSA_LANGUAGES.map((lang) => {
+                  const label = getLanguageDisplayLabel(lang);
+                  const isCurrent = preferredLanguage === lang;
+                  return (
+                    <button
+                      key={lang}
+                      type="button"
+                      role="tab"
+                      aria-selected={isCurrent}
+                      onClick={() => setPreferredLanguage(lang)}
+                      className={`rounded px-2.5 py-0.5 text-xs font-semibold transition ${
+                        isCurrent
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="text-[11px] text-zinc-500 font-mono">(C++, Python, Java available)</span>
+            </div>
           </div>
 
           {/* Overall Completion Gauge */}

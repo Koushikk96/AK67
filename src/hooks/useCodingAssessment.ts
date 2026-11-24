@@ -5,6 +5,11 @@ import { dsaProblems } from '@/content/dsa';
 import { problemRepository } from '@/db/repositories/problemRepository';
 import { studySessionRepository } from '@/db/repositories/studySessionRepository';
 import {
+  setPreferredDSALanguage,
+  getSavedDSALanguage,
+  normalizeDSALanguage,
+} from '@/utils/dsaLanguage';
+import {
   ACTIVE_CODING_STORAGE_KEY,
   LEGACY_CODING_STORAGE_KEY,
   setAssessmentActiveInMemory,
@@ -44,9 +49,7 @@ export const getSavedSprint = (): ActiveCodingSprint | null => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object') {
-        if (!parsed.selectedLanguage) {
-          parsed.selectedLanguage = 'cpp';
-        }
+        parsed.selectedLanguage = normalizeDSALanguage(parsed.selectedLanguage);
         return parsed;
       }
     }
@@ -141,13 +144,10 @@ export const useCodingAssessment = () => {
       }
 
       let lang = language;
-      if (!lang && typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('ak67_preferred_dsa_language') as DSALanguage;
-        if (saved === 'cpp' || saved === 'python' || saved === 'java') {
-          lang = saved;
-        }
+      if (!lang) {
+        lang = getSavedDSALanguage();
       }
-      if (!lang) lang = 'cpp';
+      lang = normalizeDSALanguage(lang);
 
       const now = Date.now();
       const sprint: ActiveCodingSprint = {
@@ -170,15 +170,17 @@ export const useCodingAssessment = () => {
   );
 
   const setLanguage = useCallback((lang: DSALanguage) => {
+    const valid = normalizeDSALanguage(lang);
     setActiveSprint((prev) => {
       if (!prev) return null;
       const updated: ActiveCodingSprint = {
         ...prev,
-        selectedLanguage: lang,
+        selectedLanguage: valid,
       };
       saveSprint(updated);
       return updated;
     });
+    setPreferredDSALanguage(valid);
   }, []);
 
   const revealNextHint = useCallback(() => {

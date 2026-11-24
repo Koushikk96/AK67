@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { analyticsService, UnifiedAnalyticsData } from '@/services/analyticsService';
+import { useDSALanguagePreference, getLanguageDisplayLabel } from '@/utils/dsaLanguage';
 import { RouteId } from '@/types/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -24,6 +25,7 @@ interface AnalyticsPageProps {
 export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ navigate }) => {
   const [data, setData] = useState<UnifiedAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { language: preferredLanguage } = useDSALanguagePreference();
 
   // Active view tab
   const [activeTab, setActiveTab] = useState<'overview' | 'subjects' | 'mocks' | 'weak-areas'>('overview');
@@ -232,7 +234,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ navigate }) => {
                 Curriculum Preparation Status (188 Total Items)
               </CardTitle>
               <CardDescription className="text-xs">
-                Accurate aggregate across DSA (67), C++ (17), SQL (21), Core CS (47), and Aptitude (36).
+                Accurate aggregate across DSA (67 problems • 201 C++, Python, Java solutions), C++ (17), SQL (21), Core CS (47), and Aptitude (36).
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
@@ -365,6 +367,14 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ navigate }) => {
                   <CardTitle className="text-sm font-bold text-white mt-1">
                     {sub.name}
                   </CardTitle>
+                  {sub.id === 'dsa' && (
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      201 solutions (C++, Python, Java) • Active:{' '}
+                      <span className="font-semibold text-blue-400">
+                        {getLanguageDisplayLabel(preferredLanguage)}
+                      </span>
+                    </p>
+                  )}
                 </CardHeader>
 
                 <CardContent className="p-4 pt-0 space-y-3">

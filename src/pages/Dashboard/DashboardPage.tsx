@@ -12,6 +12,7 @@ import { companyRepository } from '@/db/repositories/companyRepository';
 import { noteRepository } from '@/db/repositories/noteRepository';
 import { DailyPlannerEntry, PersonalNote } from '@/types/database';
 import { DSAProblemWithProgress } from '@/types/dsa';
+import { useDSALanguagePreference, VALID_DSA_LANGUAGES, getLanguageDisplayLabel } from '@/utils/dsaLanguage';
 import { ProblemDetailModal } from '@/components/dsa/ProblemDetailModal';
 import { revisionService, RevisionQueueData } from '@/services/revisionService';
 import { analyticsService, UnifiedAnalyticsData } from '@/services/analyticsService';
@@ -54,6 +55,7 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
   const { stats: dsaStats, problems, loading: dsaLoading, updateStatus, toggleBookmark, saveNotes, completeRevision } = useDSAProblems();
+  const { language: preferredLanguage, setLanguage: setPreferredLanguage } = useDSALanguagePreference();
 
   const [streak, setStreak] = useState<number>(0);
   const [dailyPlanner, setDailyPlanner] = useState<DailyPlannerEntry | null>(null);
@@ -400,10 +402,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center justify-between">
               <span className="font-medium text-zinc-300">DSA Solved</span>
-              <Code2 className="h-4 w-4 text-blue-400" />
+              <div className="flex items-center gap-1.5">
+                <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-mono border-blue-500/30 text-blue-400 bg-blue-500/10">
+                  {getLanguageDisplayLabel(preferredLanguage)}
+                </Badge>
+                <Code2 className="h-4 w-4 text-blue-400" />
+              </div>
             </CardDescription>
-            <CardTitle className="text-2xl font-bold text-white">
-              {dsaLoading ? '...' : `${dsaStats.solved} / 67`}
+            <CardTitle className="text-2xl font-bold text-white flex items-baseline justify-between">
+              <span>{dsaLoading ? '...' : `${dsaStats.solved} / 67`}</span>
+              <span className="text-[10px] font-normal text-zinc-500">201 solutions (C++, Py, Java)</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -512,7 +520,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
       </div>
 
       {/* Secondary Metrics: Mock Tests, Study Rhythm & Diagnostic Weak Areas */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Mock Assessment Performance */}
         <Card
           className="cursor-pointer transition hover:border-zinc-700 bg-zinc-900/30"
@@ -524,7 +532,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <Award className="h-4 w-4 text-amber-400" />
                 Assessment Simulation
               </span>
-              <Badge variant="outline" className="text-[10px]">Module I</Badge>
+              <Badge variant="outline" className="text-[10px] whitespace-nowrap">Module I</Badge>
             </div>
             <CardTitle className="text-xl font-bold text-white mt-1">
               {mockStats.total} <span className="text-xs font-normal text-zinc-400">Mock Tests Attempted</span>
@@ -552,7 +560,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <Flame className="h-4 w-4 text-amber-400" />
                 Study Rhythm
               </span>
-              <Badge variant="attempted" className="text-[10px] text-amber-400">{streak}d Streak</Badge>
+              <Badge variant="attempted" className="text-[10px] text-amber-400 whitespace-nowrap">{streak}d Streak</Badge>
             </div>
             <CardTitle className="text-xl font-bold text-white mt-1">
               {unifiedData?.activity.weeklyMinutes || 0} <span className="text-xs font-normal text-zinc-400">Minutes This Week</span>
@@ -580,7 +588,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
                 <AlertOctagon className="h-4 w-4 text-rose-400" />
                 Weak Area Radar
               </span>
-              <Badge variant={weakestArea ? 'urgent' : 'solved'} className="text-[10px]">
+              <Badge variant={weakestArea ? 'urgent' : 'solved'} className="text-[10px] whitespace-nowrap">
                 {weakestArea ? 'Needs Review' : 'Stable'}
               </Badge>
             </div>
@@ -1235,23 +1243,54 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ navigate }) => {
         <div className="space-y-4 lg:col-span-7">
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle className="text-base font-semibold text-white">
                     DSA Curriculum Mastery
                   </CardTitle>
                   <CardDescription>
-                    Progress across all 11 curated problem patterns (67 problems total)
+                    Progress across all 11 curated problem patterns (67 problems total • 201 C++, Python, Java solutions)
                   </CardDescription>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('dsa')}
-                  className="text-xs text-blue-400 hover:text-blue-300"
-                >
-                  View All <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                </Button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div
+                    className="flex items-center rounded-lg border border-zinc-800 bg-zinc-950 p-0.5"
+                    role="tablist"
+                    aria-label="Active DSA Language"
+                  >
+                    {VALID_DSA_LANGUAGES.map((lang) => {
+                      const label = getLanguageDisplayLabel(lang);
+                      const isCurrent = preferredLanguage === lang;
+                      return (
+                        <button
+                          key={lang}
+                          type="button"
+                          role="tab"
+                          aria-selected={isCurrent}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreferredLanguage(lang);
+                          }}
+                          className={`rounded px-2 py-0.5 text-[11px] font-semibold transition ${
+                            isCurrent
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('dsa')}
+                    className="text-xs text-blue-400 hover:text-blue-300"
+                  >
+                    View All <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
