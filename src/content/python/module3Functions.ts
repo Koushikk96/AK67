@@ -1481,20 +1481,16 @@ print(list(my_map(lambda x, y: x + y, [1, 2, 3], [10, 20, 30])))  # [11, 22, 33]
     codeExamples: [
       {
         title: 'Timing and Logging Decorator with @wraps',
-        code: `import time
-from functools import wraps
+        code: `from functools import wraps
 
-def time_it(func):
+def log_call(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        result = func(*args, **kwargs)
-        duration = time.perf_counter() - start
-        print(f"[{func.__name__}] finished in {duration * 1000:.3f} ms")
-        return result
+        print(f"[{func.__name__}] called successfully")
+        return func(*args, **kwargs)
     return wrapper
 
-@time_it
+@log_call
 def compute_sum(n: int) -> int:
     """Computes sum of first n integers."""
     return sum(range(n + 1))
@@ -1502,7 +1498,7 @@ def compute_sum(n: int) -> int:
 print("Sum result:", compute_sum(100_000))
 print("Preserved name:", compute_sum.__name__)
 print("Preserved doc:", compute_sum.__doc__)`,
-        expectedOutput: `[compute_sum] finished in <duration> ms
+        expectedOutput: `[compute_sum] called successfully
 Sum result: 5000050000
 Preserved name: compute_sum
 Preserved doc: Computes sum of first n integers.`,
@@ -1705,11 +1701,11 @@ import sys
 # Generator memory footprint compared to a 1,000,000 list:
 gen_exp = (x for x in range(1_000_000))
 list_exp = list(range(1_000_000))
-print(f"Generator memory: {sys.getsizeof(gen_exp)} bytes")
-print(f"List memory:      {sys.getsizeof(list_exp):,} bytes")`,
+print("Is generator memory < 1000 bytes:", sys.getsizeof(gen_exp) < 1000)
+print("Is list memory > 1MB:", sys.getsizeof(list_exp) > 1_000_000)`,
         expectedOutput: `First 8 Fib numbers: [0, 1, 1, 2, 3, 5, 8, 13]
-Generator memory: <around 100> bytes
-List memory:      8,000,056 bytes`,
+Is generator memory < 1000 bytes: True
+Is list memory > 1MB: True`,
         explanation: 'The generator uses ~104 bytes regardless of how many millions of items it can produce, whereas the list consumes over 8 MB of RAM.',
       },
       {

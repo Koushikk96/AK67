@@ -188,7 +188,7 @@ with StringIO(csv_input) as f:
 # Filter and write out modified CSV
 output_stream = StringIO()
 fieldnames = ["name", "salary", "bonus"]
-writer = csv.DictWriter(output_stream, fieldnames=fieldnames)
+writer = csv.DictWriter(output_stream, fieldnames=fieldnames, lineterminator="\\n")
 writer.writeheader()
 
 for r in records:
@@ -836,18 +836,13 @@ def step_two(y):
 def step_three(z):
     # Inspecting stack frames programmatically
     stack = traceback.extract_stack()
-    print("Call Stack Trace (depth = {}):".format(len(stack)))
-    for frame in stack[-4:-1]:
-        print(f"  In {frame.name}() at line {frame.lineno}: {frame.line}")
+    call_names = [f.name for f in stack if not f.name.startswith("<")]
+    print("Call Stack Sequence:", " -> ".join(call_names))
     return z ** 2
 
 result = step_one(10)
-print("\\nResult:", result)`,
-        expectedOutput: `Call Stack Trace (depth = 5):
-  In <module>() at line 14: result = step_one(10)
-  In step_one() at line 4: return step_two(x * 2)
-  In step_two() at line 7: return step_three(y - 5)
-
+print("Result:", result)`,
+        expectedOutput: `Call Stack Sequence: step_one -> step_two -> step_three
 Result: 225`,
         explanation:
           'traceback.extract_stack() illustrates how the Python call stack tracks active execution frames across nested function invocations.',
@@ -860,8 +855,10 @@ def custom_post_mortem(exc_type, exc_value, exc_traceback):
     print("--- CUSTOM POST-MORTEM DIAGNOSTIC ---")
     print(f"Exception Type: {exc_type.__name__}")
     print(f"Message: {exc_value}")
-    last_frame = exc_traceback.tb_frame
-    print(f"Local variables at crash site: {last_frame.f_locals}")
+    curr = exc_traceback
+    while curr.tb_next:
+        curr = curr.tb_next
+    print(f"Local variables at crash site: {curr.tb_frame.f_locals}")
 
 def faulty_division(a, b):
     factor = 100
@@ -1024,12 +1021,10 @@ def authenticate(token: str):
         logger.error("Authentication check failed", exc_info=True)
 
 authenticate("wrong_token")
-first_few_lines = "\\n".join(log_stream.getvalue().strip().splitlines()[:3])
-print(first_few_lines)
+first_line = log_stream.getvalue().strip().splitlines()[0]
+print(first_line)
 print("... [traceback captured cleanly]")`,
         expectedOutput: `ERROR: Authentication check failed
-Traceback (most recent call last):
-  File "<string>", line 13, in authenticate
 ... [traceback captured cleanly]`,
         explanation:
           'Passing exc_info=True (or logger.exception("...")) automatically appends the current exception traceback to the log record.',
@@ -1159,7 +1154,7 @@ pythonpath = ["src"]
 
 print("pyproject.toml Blueprint:")
 print(pyproject_toml_content.strip())`,
-        expectedOutput: `pyproject_toml_content Blueprint:
+        expectedOutput: `pyproject.toml Blueprint:
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

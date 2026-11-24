@@ -487,42 +487,44 @@ backend_devs = {"Charlie", "David", "Eve", "Frank"}
 
 # Fullstack developers (intersection)
 fullstack = frontend_devs & backend_devs
-print("Fullstack:", fullstack)
 
-# All engineering staff (union)
+# All engineers (union)
 all_engineers = frontend_devs | backend_devs
-print("All Engineers:", all_engineers)
 
-# Frontend ONLY (difference)
+# Frontend only (difference)
 frontend_only = frontend_devs - backend_devs
-print("Frontend only:", frontend_only)
 
-# Specialized in exactly ONE domain (symmetric difference)
+# Single domain devs (symmetric difference)
 single_domain = frontend_devs ^ backend_devs
-print("Single domain devs:", single_domain)`,
-        expectedOutput: `Fullstack: {'Charlie', 'David'}
-All Engineers: {'Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank'}
-Frontend only: {'Alice', 'Bob'}
-Single domain devs: {'Alice', 'Bob', 'Eve', 'Frank'}`,
+
+print("Fullstack:", sorted(list(fullstack)))
+print("All Engineers:", sorted(list(all_engineers)))
+print("Frontend only:", sorted(list(frontend_only)))
+print("Single domain devs:", sorted(list(single_domain)))`,
+        expectedOutput: `Fullstack: ['Charlie', 'David']
+All Engineers: ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank']
+Frontend only: ['Alice', 'Bob']
+Single domain devs: ['Alice', 'Bob', 'Eve', 'Frank']`,
         explanation: 'Standard bitwise-style operators (&, |, -, ^) map directly to set theory operations.',
       },
       {
         title: 'Fast O(1) Membership Lookup in Large Collections',
-        code: `import time
-
-# List lookup vs Set lookup benchmark demonstration
+        code: `# List lookup vs Set lookup benchmark demonstration
 large_list = list(range(100_000))
 large_set = set(large_list)
 
 target = 99_999
 
 # Set lookup: O(1) average hash lookup
-start = time.perf_counter()
 found_in_set = target in large_set
-time_set = time.perf_counter() - start
+found_in_list = target in large_list
 
-print(f"Target found in set: {found_in_set} in {time_set * 1e6:.2f} microseconds")`,
-        expectedOutput: `Target found in set: True in <under_1> microseconds`,
+print("Target found in set:", found_in_set)
+print("Target found in list:", found_in_list)
+print("Is large_set type set:", isinstance(large_set, set))`,
+        expectedOutput: `Target found in set: True
+Target found in list: True
+Is large_set type set: True`,
         explanation: 'in check on a set is $O(1)$ average via hash table lookup, whereas on a list it is $O(n)$ linear scan.',
       },
     ],
@@ -817,7 +819,7 @@ print(f"Average CS Score: {avg_cs:.2f}")
 top_student = max(students, key=lambda s: sum(s["scores"].values()))
 print(f"Top Student: {top_student['name']} with {sum(top_student['scores'].values())} pts")`,
         expectedOutput: `Average CS Score: 94.00
-Top Student: Diya with 183 pts`,
+Top Student: Aarav with 185 pts`,
         explanation: 'Using lambda functions with key= in max() extracts nested dictionary properties cleanly.',
       },
     ],
@@ -1109,8 +1111,8 @@ Passing Students: {'Aarav': 88, 'Chirag': 76}`,
 
 # Clean, lowercase, and deduplicate into a set comprehension:
 unique_domains = {email.strip().lower().split("@")[1] for email in raw_emails}
-print("Unique domains:", unique_domains)`,
-        expectedOutput: `Unique domains: {'ak67.local', 'google.com'}`,
+print("Unique domains:", sorted(list(unique_domains)))`,
+        expectedOutput: `Unique domains: ['ak67.local', 'google.com']`,
         explanation: 'Set comprehension applies data cleaning and automatically eliminates duplicates in $O(n)$ time.',
       },
     ],
@@ -1387,7 +1389,9 @@ Deep     (completely independent): [[1, 2, 3], [4, 5, 6]]`,
       },
       {
         title: 'Immutability and Hashing Integrity',
-        code: `class Point:
+        code: `import copy
+
+class Point:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y

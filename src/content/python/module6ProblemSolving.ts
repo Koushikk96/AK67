@@ -922,7 +922,27 @@ print("Reversed list:", to_list(reversed_head))`,
       },
       {
         title: 'Merge Two Sorted Lists with Dummy Node',
-        code: `def merge_two_lists(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
+        code: `class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def build_list(vals):
+    dummy = ListNode(0)
+    curr = dummy
+    for v in vals:
+        curr.next = ListNode(v)
+        curr = curr.next
+    return dummy.next
+
+def to_list(node):
+    res = []
+    while node:
+        res.append(node.val)
+        node = node.next
+    return res
+
+def merge_two_lists(l1: ListNode | None, l2: ListNode | None) -> ListNode | None:
     dummy = ListNode(0)
     tail = dummy
 

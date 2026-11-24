@@ -20,42 +20,31 @@ export const module1Topics: MasteryTopic[] = [
       {
         title: 'Inspecting Python Runtime & Bytecode Generation',
         code: `import sys
-import dis
 
 def calculate_square(x: int) -> int:
     return x * x
 
-print("Python Version:", sys.version_info.major, sys.version_info.minor)
+print("Python Major Version:", sys.version_info.major)
 print("Square of 7:", calculate_square(7))
-
-# Disassemble bytecode to see Python Virtual Machine instructions
-print("\\nBytecode Instructions:")
-dis.dis(calculate_square)`,
-        expectedOutput: `Python Version: 3 11
+print("Function Name:", calculate_square.__name__)
+print("Variable Names:", calculate_square.__code__.co_varnames)`,
+        expectedOutput: `Python Major Version: 3
 Square of 7: 49
-
-Bytecode Instructions:
-  4           0 LOAD_FAST                0 (x)
-              2 LOAD_FAST                0 (x)
-              4 BINARY_OP                5 (*)
-              8 RETURN_VALUE`,
+Function Name: calculate_square
+Variable Names: ('x',)`,
         explanation:
-          'dis.dis() demonstrates how the function is compiled into simple stack-based PVM operations (LOAD_FAST, BINARY_OP, RETURN_VALUE).',
+          'Demonstrates inspecting function metadata and code objects compiled by CPython for virtual machine execution.',
       },
       {
-        title: 'Interactive Execution & The Zen of Python',
-        code: `import this  # Prints the Zen of Python aphorisms
-
-# Demonstrating expressive elegance:
+        title: 'Expressive Elegance & The Zen of Python',
+        code: `# Demonstrating Pythonic expressive elegance
+zen_quote = "Explicit is better than implicit."
 numbers = [1, 2, 3, 4, 5]
 squared_evens = [n ** 2 for n in numbers if n % 2 == 0]
-print("Squared evens:", squared_evens)`,
-        expectedOutput: `The Zen of Python, by Tim Peters
 
-Beautiful is better than ugly.
-Explicit is better than implicit.
-Simple is better than complex.
-...
+print("Guiding Principle:", zen_quote)
+print("Squared evens:", squared_evens)`,
+        expectedOutput: `Guiding Principle: Explicit is better than implicit.
 Squared evens: [4, 16]`,
         explanation:
           'Python enables clear, concise idioms (such as list comprehensions) that align with core language design principles.',
@@ -305,25 +294,25 @@ print_matrix()`,
     codeExamples: [
       {
         title: 'Dynamic Typing and Object Identity',
-        code: `a = 1000
+        code: `a = [1, 2, 3]
 b = a
-c = 1000
+c = [1, 2, 3]
 
 print("a == b:", a == b)      # Value equality
 print("a is b:", a is b)      # Identity / memory address check
-print("a is c:", a is c)      # Different heap objects (outside small int cache)
-print("id(a):", id(a))
-print("id(b):", id(b))
+print("a is c:", a is c)      # Different heap objects
+print("id(a) == id(b):", id(a) == id(b))
+print("id(a) == id(c):", id(a) == id(c))
 
 # Variable re-assignment to another type (dynamic typing):
 a = "Python Rocks"
-print("a new type:", type(a))`,
+print("a new type:", type(a).__name__)`,
         expectedOutput: `a == b: True
 a is b: True
 a is c: False
-id(a): <some_memory_address>
-id(b): <same_memory_address>
-a new type: <class 'str'>`,
+id(a) == id(b): True
+id(a) == id(c): False
+a new type: str`,
         explanation:
           'a and b point to the identical object in heap memory. Reassigning a to a string points the name a to a new string object without affecting b.',
       },

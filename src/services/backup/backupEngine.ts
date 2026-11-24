@@ -170,13 +170,48 @@ export const backupEngine = {
           const mergedCheckpoints = Array.from(
             new Set([...(local.completedCheckpoints || []), ...(incoming.completedCheckpoints || [])])
           );
+
+          // Status precedence: completed > revise > learning > not_started
+          const topicStatusRank: Record<string, number> = {
+            completed: 4,
+            revise: 3,
+            learning: 2,
+            not_started: 1,
+          };
+          const localStatus = local.status || 'not_started';
+          const incomingStatus = incoming.status || 'not_started';
+          const resolvedStatus =
+            (topicStatusRank[incomingStatus] || 0) > (topicStatusRank[localStatus] || 0)
+              ? incoming.status
+              : local.status;
+
+          // Merge notes if distinct
+          let mergedNotes = local.notes || '';
+          if (incoming.notes && incoming.notes !== local.notes) {
+            if (!local.notes) {
+              mergedNotes = incoming.notes;
+            } else if (!local.notes.includes(incoming.notes)) {
+              mergedNotes = `${local.notes}\n\n[Restored Note]: ${incoming.notes}`;
+            }
+          }
+
           const mergedTopic: TopicProgress = {
             ...local,
+            status: resolvedStatus,
+            bookmarked: local.bookmarked || incoming.bookmarked,
+            notes: mergedNotes,
             completedCheckpoints: mergedCheckpoints,
             isMastered:
               local.isMastered ||
               incoming.isMastered ||
               mergedCheckpoints.length >= (local.totalCheckpoints || 1),
+            revisionCount: Math.max(local.revisionCount || 0, incoming.revisionCount || 0),
+            intervalDays: Math.max(local.intervalDays || 0, incoming.intervalDays || 0),
+            nextRevisionDate:
+              (incoming.nextRevisionDate || '') > (local.nextRevisionDate || '')
+                ? incoming.nextRevisionDate
+                : local.nextRevisionDate,
+            inRevisionQueue: local.inRevisionQueue || incoming.inRevisionQueue,
             lastStudiedAt:
               (incoming.lastStudiedAt || '') > (local.lastStudiedAt || '')
                 ? incoming.lastStudiedAt

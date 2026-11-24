@@ -49,6 +49,7 @@ export const topicRepository = {
       await database.topic_progress.update(topicId, {
         completedCheckpoints: updated,
         isMastered,
+        status: isMastered ? 'completed' : updated.length > 0 ? 'learning' : 'not_started',
         lastStudiedAt: now,
       });
 
@@ -61,11 +62,91 @@ export const topicRepository = {
         totalCheckpoints,
         completedCheckpoints: [checkpointId],
         isMastered,
+        status: isMastered ? 'completed' : 'learning',
         notes: '',
         lastStudiedAt: now,
       });
       return true;
     }
+  },
+
+  async toggleBookmark(
+    topicId: string,
+    category: string = 'general',
+    database: AK67Database = db
+  ): Promise<boolean> {
+    const existing = await database.topic_progress.get(topicId);
+    const now = new Date().toISOString();
+
+    if (existing) {
+      const nextBookmarked = !existing.bookmarked;
+      await database.topic_progress.update(topicId, {
+        bookmarked: nextBookmarked,
+        lastStudiedAt: now,
+      });
+      return nextBookmarked;
+    } else {
+      await database.topic_progress.put({
+        id: topicId,
+        category,
+        totalCheckpoints: 0,
+        completedCheckpoints: [],
+        isMastered: false,
+        status: 'not_started',
+        bookmarked: true,
+        notes: '',
+        lastStudiedAt: now,
+      });
+      return true;
+    }
+  },
+
+  async updateNotes(
+    topicId: string,
+    notes: string,
+    category: string = 'general',
+    database: AK67Database = db
+  ): Promise<void> {
+    const existing = await database.topic_progress.get(topicId);
+    const now = new Date().toISOString();
+
+    if (existing) {
+      await database.topic_progress.update(topicId, {
+        notes,
+        lastStudiedAt: now,
+      });
+    } else {
+      await database.topic_progress.put({
+        id: topicId,
+        category,
+        totalCheckpoints: 0,
+        completedCheckpoints: [],
+        isMastered: false,
+        status: 'not_started',
+        bookmarked: false,
+        notes,
+        lastStudiedAt: now,
+      });
+    }
+  },
+
+  async getBookmarked(database: AK67Database = db): Promise<TopicProgress[]> {
+    return database.topic_progress.filter((t) => Boolean(t.bookmarked)).toArray();
+  },
+
+  async getRevisionQueue(database: AK67Database = db): Promise<TopicProgress[]> {
+    return database.topic_progress
+      .filter((t) => Boolean(t.inRevisionQueue) || t.status === 'revise')
+      .toArray();
+  },
+
+  async getDueRevisions(dateStr?: string, database: AK67Database = db): Promise<TopicProgress[]> {
+    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+    return database.topic_progress
+      .where('nextRevisionDate')
+      .belowOrEqual(targetDate)
+      .and((t) => t.status === 'completed' || t.status === 'revise')
+      .toArray();
   },
 
   async countTotal(database: AK67Database = db): Promise<number> {

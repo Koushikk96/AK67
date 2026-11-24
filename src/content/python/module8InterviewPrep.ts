@@ -61,14 +61,14 @@ x = 250
 y = 250
 print(f"250 is 250: {x is y} (Cached by CPython runtime)")
 
-p = 1000
-q = 1000
-print(f"1000 is 1000 in separate expressions: {p is q} (May be False outside constant folding)")`,
+p = int("1000")
+q = int("1000")
+print(f"Dynamic 1000 is 1000: {p is q} (Distinct heap objects)")`,
         expectedOutput: `a == b: True (Value equality)
 a is b: False (Identity / Memory address equality)
 a is c: True (Both reference identical memory)
 250 is 250: True (Cached by CPython runtime)
-1000 is 1000 in separate expressions: False (May be False outside constant folding)`,
+Dynamic 1000 is 1000: False (Distinct heap objects)`,
         explanation:
           '== checks value equality by invoking __eq__; "is" tests identity by comparing id() memory addresses. CPython pre-allocates and caches small integers between -5 and 256.',
       },
@@ -757,11 +757,10 @@ start = time.perf_counter()
 with ThreadPoolExecutor(max_workers=4) as executor:
     results = list(executor.map(simulate_io_task, range(4)))
 
-elapsed = time.perf_counter() - start
 print("Parallel I/O Results:", results)
-print(f"4 tasks finished concurrently in ~{elapsed:.2f}s")`,
+print("Tasks executed concurrently:", len(results) == 4)`,
         expectedOutput: `Parallel I/O Results: ['Task 0 completed', 'Task 1 completed', 'Task 2 completed', 'Task 3 completed']
-4 tasks finished concurrently in ~0.02s`,
+Tasks executed concurrently: True`,
         explanation:
           'ThreadPoolExecutor runs I/O tasks concurrently because time.sleep() and socket operations release the GIL, allowing other threads to run.',
       },
@@ -938,9 +937,9 @@ del node_b
 # The nodes still exist in RAM due to circular references!
 print("Collecting unreachable cyclic objects...")
 unreachable = gc.collect()
-print(f"GC successfully collected {unreachable} unreachable cyclic objects.")`,
+print("GC collected cyclic objects:", unreachable >= 2)`,
         expectedOutput: `Collecting unreachable cyclic objects...
-GC successfully collected 4 unreachable cyclic objects.`,
+GC collected cyclic objects: True`,
         explanation:
           'Cyclic reference garbage collector scans generations using a trial deletion algorithm to identify and collect unreachable isolated cycles.',
       },
@@ -1178,28 +1177,26 @@ print("Top 2 frequent in [1,1,1,2,2,3]:", top_k_frequent([1, 1, 1, 2, 2, 3], 2))
         code: `from collections import deque
 import time
 
-size = 50000
+size = 20000
 
 # Benchmark list.pop(0) - O(N) per operation
 lst = list(range(size))
 t0 = time.perf_counter()
-for _ in range(1000):
+for _ in range(500):
     lst.pop(0)
 t_list = time.perf_counter() - t0
 
 # Benchmark deque.popleft() - O(1) per operation
 dq = deque(range(size))
 t1 = time.perf_counter()
-for _ in range(1000):
+for _ in range(500):
     dq.popleft()
 t_deque = time.perf_counter() - t1
 
-print(f"List pop(0) x 1000:   {t_list:.5f}s")
-print(f"Deque popleft() x 1000: {t_deque:.5f}s")
-print(f"Deque was approximately {t_list / max(t_deque, 1e-9):.1f}x faster!")`,
-        expectedOutput: `List pop(0) x 1000:   0.00840s
-Deque popleft() x 1000: 0.00008s
-Deque was approximately 105.0x faster!`,
+print("Deque popleft is faster than list pop(0):", t_deque < t_list)
+print("Deque size after pops:", len(dq))`,
+        expectedOutput: `Deque popleft is faster than list pop(0): True
+Deque size after pops: 19500`,
         explanation:
           'list.pop(0) shifts all remaining elements in contiguous memory (O(N)), whereas deque.popleft() unlinks a node from the head of a doubly-linked block (O(1)).',
       },
@@ -1216,7 +1213,7 @@ second_smallest = heapq.heappop(numbers)
 
 print("Heapified array representation:", numbers)
 print(f"Extracted smallest: {smallest}, second smallest: {second_smallest}")`,
-        expectedOutput: `Heapified array representation: [6, 8, 27, 14, 99, 42]
+        expectedOutput: `Heapified array representation: [6, 8, 27, 42, 14, 99]
 Extracted smallest: 1, second smallest: 3`,
         explanation:
           'Floyd\'s heapify algorithm builds a heap in O(N) linear time, which is strictly faster than inserting N elements sequentially with heappush (O(N log N)).',

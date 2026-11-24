@@ -135,6 +135,7 @@ export function usePythonMastery() {
       const now = new Date().toISOString();
 
       const record: TopicProgress = {
+        ...(existing || {}),
         id: topicId,
         category: 'python',
         status,
@@ -163,6 +164,7 @@ export function usePythonMastery() {
       const nextBookmarked = !(existing?.bookmarked || false);
 
       const record: TopicProgress = {
+        ...(existing || {}),
         id: topicId,
         category: 'python',
         status: existing?.status || 'not_started',
@@ -200,6 +202,7 @@ export function usePythonMastery() {
       const now = new Date().toISOString();
 
       const record: TopicProgress = {
+        ...(existing || {}),
         id: topicId,
         category: 'python',
         status: existing?.status || 'not_started',
@@ -228,6 +231,7 @@ export function usePythonMastery() {
       const nextRevisionDate = nextDate.toISOString().split('T')[0];
 
       const record: TopicProgress = {
+        ...(existing || {}),
         id: topicId,
         category: 'python',
         status: 'revise',
